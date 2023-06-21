@@ -1,31 +1,37 @@
 """
 A utility to syllabify Latin words stored in
-CantusDB. As a result, this utility assumes latin transcription
+Cantus Database. As a result, this utility assumes latin transcription
 conventions of CantusDB (found in the "Text Entry and Editing" pdf
 at https://cantus.uwaterloo.ca/documents) which include both standardized
 classical latin spelling and non-standardized (ie. what is 
 actually in the manuscript) spellings. Consult the README for more
 details.
 
-Use syllabify_word method to syllabify a word.
+Use syllabify_word to syllabify a word.
 
-syllabify_word(word, as_list=True, verbose=False)
+syllabify_word(word, return_syllabified_string = False) 
     word [str]: string to syllabify
-    as_list [bool]: return syllables as a list of strings if True.
-        Otherwise, return syllables as a single string with hyphens
-        marking syllable boundaries.
-    verbose [bool]: print debug info
+    return_syllabified_string [bool]: if True, returns a string with
+        syllables separated by hyphens; if False, returns a list of
+        indices of syllable boundaries. Defaults to False.
 
 returns a list of syllables with syllable boundaries marked by hyphens.
+
+The function split_word_by_syl_bounds can be used to split a word
+into syllables based on syllable boundaries. See function docstring
+for more details.
+
+Logs at level = DEBUG.
 """
 
 import itertools
 import logging
+import re
 from typing import Union
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
-_CONSONANT_GROUPS = ["ch", "ph", "th"] + [
+_CONSONANT_GROUPS = ["ch", "ph", "th", "rh"] + [
     x[0] + x[1] for x in itertools.product("pbtdcfg", "lr")
 ]
 
@@ -42,17 +48,22 @@ _VOWELS = [
     "u",
 ]
 
+LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
 
-def _split_word_by_syl_bounds(word: str, syl_bounds: "list[int]") -> "list[str]":
+
+def split_word_by_syl_bounds(word: str, syl_bounds: "list[int]") -> "list[str]":
     """
     Splits a word into syllables based on syllable boundaries.
 
     word [str]: word to split
-    syl_bounds [list[int]]: list of syllable boundaries
+    syl_bounds [list[int]]: list of syllable boundaries. If a one-syllable
+        word, should be [].
 
     returns [list[str]]: list of syllables, with hyphens added at the
         end of non-final syllables
     """
+    if len(syl_bounds) == 0:
+        return [word]
     # Start with the first syllable (characters before first boundary)
     syllables = [f"{word[:syl_bounds[0]]}-"]
     # Add middle syllables (characters between boundaries)
@@ -209,17 +220,17 @@ def _find_word_syl_bounds(word: str) -> "list[int]":
 
     returns [list[int]]: list of syllables
     """
-    logging.debug("### Finding syllables: %s", word)
+    logging.debug("Finding syllables: %s", word)
 
     if len(word) <= 1:
-        logging.debug("Final word syllabification: %s", word)
+        logging.debug("### Final word syllabification: %s", word)
         return None
 
     # Each syllable has one and only one vowel group, so
     # we start by finding the positions of those vowel groups.
     vowel_group_pos = _get_vowel_group_positions(word)
     if len(vowel_group_pos) == 1:
-        logging.debug("Final word syllabification: %s", word)
+        logging.debug("### Final word syllabification: %s", word)
         return None
     # We start by assuming that the syllable boundaries of the word
     # are at the end of each vowel group (except the final group, which ends
@@ -227,8 +238,8 @@ def _find_word_syl_bounds(word: str) -> "list[int]":
     # in cases where there is more than one consonant between two vowel groups.
     syllable_boundaries = [x[1] for x in vowel_group_pos[:-1]]
     logging.debug(
-        "Vowel group split: %s",
-        "".join(_split_word_by_syl_bounds(word, syllable_boundaries)),
+        "### Vowel group split: %s",
+        "".join(split_word_by_syl_bounds(word, syllable_boundaries)),
     )
     # We iterate through successive pairs of vowel groups, and if there is more than one
     # letter between the two vowel groups, we determine how to move the syllable boundary.
@@ -245,40 +256,45 @@ def _find_word_syl_bounds(word: str) -> "list[int]":
         syl_bound += syl_bound_adj
         if prev_syl_bound == syl_bound:
             logging.debug(
-                "CASE: %s. No change: %s",
+                "### CASE: %s. No change: %s",
                 split_case,
                 f"{word[:syl_bound]}-{word[syl_bound:]}",
             )
         else:
             logging.debug(
-                "CASE: %s. %s --> %s",
+                "### CASE: %s. %s --> %s",
                 split_case,
                 f"{word[:prev_syl_bound]}-{word[prev_syl_bound:]}",
                 f"{word[:syl_bound]}-{word[syl_bound:]}",
             )
         ed_syllable_boundaries.append(syl_bound)
     logging.debug(
-        "Final word syllabification: %s",
-        "".join(_split_word_by_syl_bounds(word, ed_syllable_boundaries)),
+        "### Final word syllabification: %s",
+        "".join(split_word_by_syl_bounds(word, ed_syllable_boundaries)),
     )
     return ed_syllable_boundaries
 
 
-def syllabify_word(word: str, as_list: bool = True) -> Union["list[str]", str]:
+def syllabify_word(
+    word: str, return_syllabified_string: bool = False
+) -> Union["list[int]", str]:
     """
-    Splits a word into syllables.
     See README for details on syllabification rules.
 
     word [str]: word to syllabify
-    as_list [bool]: if True, returns a list of syllables; otherwise, returns a string
+    return_syllabified_string [bool]: see return value. Default is False.
 
-    returns [list[str] or str]: list of syllables or string of syllables
+    returns [list[int] or str]: By default, returns a list of integers representing
+        the indices of the syllable boundaries of word. Indices indicate the letter that begins
+        the syllable. For example, the word "podatus" would return [2, 4] (po-da-tus).
+        If a one-syllable word is passed, returns an empty list. If return_syllabified_string
+        is True, returns a string with hyphens inserted at the syllable boundaries.
     """
+    if LATIN_ALPH_REGEX.search(word):
+        raise ValueError(f"Word {word} contains non-alphabetic characters.")
     syllable_boundaries = _find_word_syl_bounds(word)
-    if syllable_boundaries:
-        syl_list = _split_word_by_syl_bounds(word, syllable_boundaries)
-    else:
-        syl_list = [word]
-    if as_list:
-        return syl_list
-    return "".join(syl_list)
+    if not return_syllabified_string:
+        if syllable_boundaries:
+            return syllable_boundaries
+        return []
+    return "".join(split_word_by_syl_bounds(word, syllable_boundaries))
