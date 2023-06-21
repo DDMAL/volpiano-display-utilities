@@ -1,6 +1,7 @@
 import unittest
 
 from latin_word_syllabification import syllabify_word
+from syllabify import _clean_text, _prepare_text
 
 
 class TestWordSyllabification(unittest.TestCase):
@@ -23,3 +24,15 @@ class TestWordSyllabification(unittest.TestCase):
         for word, expected in test_words.items():
             with self.subTest(word=word):
                 self.assertEqual(syllabify_word(word, as_list=False), expected)
+
+
+class TestTextSyllabification(unittest.TestCase):
+    def test_clean_test(self):
+        initial_text = "abcdefg @#$&*[^@]#${}|~[]\/|"
+        expected_text = "abcdefg #[]#{}|~[]|"
+        self.assertEqual(_clean_text(initial_text), expected_text)
+
+    def test_prepare_text(self):
+        initial_text = " abcdefg  {#} gau-[dia] | Alleluia "
+        expected_text = "abcdefg gaudia alleluia"
+        self.assertEqual(_prepare_text(initial_text), expected_text)
