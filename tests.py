@@ -2,6 +2,7 @@
 Tests functioanlity of this package.
 """
 import unittest
+import json
 
 from latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
 from cantus_text_syllabification import (
@@ -9,8 +10,10 @@ from cantus_text_syllabification import (
     _prepare_string_for_syllabification,
     _get_text_sections,
     syllabify_text,
+    stringify_syllabified_text,
+    flatten_syllabified_text,
 )
-
+from text_volpiano_alignment import align_syllabified_text_and_volpiano
 
 class TestWordSyllabification(unittest.TestCase):
     """
@@ -33,6 +36,11 @@ class TestWordSyllabification(unittest.TestCase):
             "aquarum": "a-qua-rum",
             "cuius": "cu-ius",
             "alleluia": "al-le-lu-ia",
+            "alleluya": "al-le-lu-ya",
+            "hierusalem": "hie-ru-sa-lem",
+            "ihesum": "ihe-sum",
+            "adiuvabit": "ad-iu-va-bit",
+            "mihi": "mi-hi",
         }
         word_syl_bounds = {
             "Benedictus": [2, 4, 7],
@@ -48,6 +56,11 @@ class TestWordSyllabification(unittest.TestCase):
             "aquarum": [1, 4],
             "cuius": [2],
             "alleluia": [2, 4, 6],
+            "alleluya": [2, 4, 6],
+            "hierusalem": [3, 5, 7],
+            "ihesum": [3],
+            "adiuvabit": [2, 4, 6],
+            "mihi": [2],
         }
         for word, expected in test_words.items():
             with self.subTest(word=word):
@@ -72,6 +85,11 @@ class TestWordSyllabification(unittest.TestCase):
             "aquarum": [1, 4],
             "cuius": [2],
             "alleluia": [2, 4, 6],
+            "alleluya": [2, 4, 6],
+            "hierusalem": [3, 5, 7],
+            "ihesum": [3],
+            "adiuvabit": [2, 4, 6],
+            "mihi": [2],
         }
         for word, expected in test_words.items():
             with self.subTest(word=word):
@@ -128,6 +146,18 @@ class TestCantusTextSyllabification(unittest.TestCase):
             " amen",
         ]
         self.assertEqual(_get_text_sections(start_str), sectioned)
+
+    def test_stringify_syllabified_text(self):
+        """Tests stringify_syllabified_text."""
+        syllabified_text = [["San-", "ctus"], ["san-", "ctus"], ["san-", "ctus"]]
+        exp_result = "San-ctus san-ctus san-ctus"
+        self.assertEqual(stringify_syllabified_text(syllabified_text), exp_result)
+
+    def test_flatten_syllabified_text(self):
+        """Tests flatten_syllabified_text."""
+        syllabified_text = [["San-", "ctus"], ["san-", "ctus"], ["san-", "ctus"]]
+        exp_result = ["San-", "ctus", "san-", "ctus", "san-", "ctus"]
+        self.assertEqual(flatten_syllabified_text(syllabified_text), exp_result)
 
     def test_syllabify_text(self):
         """Tests syllabify_text. Constructs a test string with all possible cases."""
@@ -217,3 +247,29 @@ class TestCantusTextSyllabification(unittest.TestCase):
         )
         syllabified_text = syllabify_text(full_test_string)
         self.assertEqual(syllabified_text, full_expected_result)
+
+
+class TestTextVolpianoAlignment(unittest.TestCase):
+    """
+    Tests functions for aligning text and volpiano in
+    text_volpiano_alignment.py.
+    """
+
+    def test_align_text_volpiano(self):
+        """
+        Tests align_text_volpiano.
+        """
+        with open("alignment_test_cases.json", encoding="ascii") as test_case_json:
+            test_cases = json.load(test_case_json)
+        for test_case in test_cases:
+            tupled_case = []
+            for list_elem in test_case["expected_result"]:
+                tupled_case.append(tuple(list_elem))
+            test_case["expected_result"] = tupled_case
+        for test_case in test_cases:
+            with self.subTest(test_case["case_name"]):
+                result = align_syllabified_text_and_volpiano(
+                    syllabify_text(test_case["text_input"]),
+                    test_case["vol_input"],
+                )
+                self.assertEqual(result, test_case["expected_result"])

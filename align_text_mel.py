@@ -1,4 +1,4 @@
-from latin_syllabification import syllabify_word
+from latin_word_syllabification import syllabify_word
 from itertools import zip_longest
 
 """

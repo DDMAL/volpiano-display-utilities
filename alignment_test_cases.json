@@ -1,0 +1,186 @@
+[
+    {
+        "case_name": "Test alignment: no special characters",
+        "text_input": "in diebus eius obsessa est",
+        "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "4"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: internal bar lines",
+        "text_input": "in diebus |eius | obsessa est",
+        "vol_input": "1---f---df--f--f---3---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["|", "3---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["|", "4---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: missing final bar",
+        "text_input": "in diebus",
+        "vol_input": "1---f---df--f--f--",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: missing music",
+        "text_input": "in {diebus add char} e- {ius} obsessa est",
+        "vol_input": "1---f---6------6---f---6------6---g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["{diebus add char}", "6------------------6---"],
+            ["e-", "f---"],
+            ["{ius}", "6------6---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: missing words",
+        "text_input": "in # eius obsess- #",
+        "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf---ef--gef--ed---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["#", "df--"],
+            ["","f--"],
+            ["", "f---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["ob-", "g--"],
+            ["sess-", "hg-hgf---"],
+            ["#", "ef--"],
+            ["","gef--"],
+            ["","ed---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: missing words and music",
+        "text_input": "in {#} eius obsess- {#}",
+        "vol_input": "1---f---6------6---f--efgfe---g--hg-hgf---6------6---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["{#}", "6------6---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["ob-", "g--"],
+            ["sess-", "hg-hgf---"],
+            ["{#}", "6------6---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: overflow text",
+        "text_input": "in diebus eius obsessa est",
+        "vol_input": "1---f---df--f-f---f--g-efgfe---g--hg-hgf--ef-gef--ed---4",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-bus", "f-f---"],
+            ["e-", "f--"],
+            ["ius","g-efgfe---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef--"],
+            ["","ed---"],
+            ["est", "--"],
+            ["", "4"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: overflow volpiano",
+        "text_input": "in diebus eius obsessa est",
+        "vol_input": "1---f---df--f--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---gh---4",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f--"],
+            ["","f---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "gh---"],
+            ["", "4"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: text with incipit",
+        "text_input": "in diebus | ~eius | obsessa | ~est",
+        "vol_input": "1---f---df--f--f---3---f---efgfe---3---g--hg-hgf--ef-gef---4---ed---4",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["|","3---"],
+            ["~eius", "f---efgfe---"],
+            ["|", "3---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["|", "4---"],
+            ["~est", "ed---"],
+            ["", "4"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: text with ipsum",
+        "text_input": "in diebus eius | ~Ipsum [obsessa est]",
+        "vol_input": "1---f---df--f--f---f--efgfe---4---g--hg-hgf--ef-gef---ed---4",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["|", "4---"],
+            ["~Ipsum[obsessa est]", "g--hg-hgf--ef-gef---ed---"],
+            ["", "4"]
+        ]
+    }
+]

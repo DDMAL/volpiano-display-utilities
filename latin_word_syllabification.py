@@ -31,7 +31,7 @@ from typing import Union
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
-_CONSONANT_GROUPS = ["ch", "ph", "th", "rh"] + [
+_CONSONANT_GROUPS = ["ch", "ph", "th", "rh", "gn"] + [
     x[0] + x[1] for x in itertools.product("pbtdcfg", "lr")
 ]
 
@@ -46,6 +46,10 @@ _VOWELS = [
     "i",
     "o",
     "u",
+    "y",
+]
+_SEMICONS_I_PREFIX_GROUPS = [
+    "","h","ab","ob","ad","per","sub","in","con"
 ]
 
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
@@ -112,7 +116,7 @@ def _get_vowel_group(word: str, word_indexer: int) -> str:
     if word_indexer == len(word) - 1:
         return vowel_found
     # If the following letter is not a vowel, return the single vowel.
-    if not _is_vowel(word[word_indexer + 1]):
+    if not _is_vowel(word[word_indexer + 1]) and word[word_indexer + 1] != "h":
         return vowel_found
     # If following letter is a vowel, there are four possibilities:
     # 1. the two vowels are a dipthong
@@ -125,9 +129,17 @@ def _get_vowel_group(word: str, word_indexer: int) -> str:
     #    consonant.
     if f"{vowel_found}{word[word_indexer + 1]}" in _DIPTHONGS:
         return word[word_indexer : word_indexer + 2]
-    if _is_vowel(word[word_indexer - 1]) and vowel_found == "i":
-        return word[word_indexer : word_indexer + 2]
-    if word[word_indexer - 1] == "q" and vowel_found == "u":
+    if vowel_found in "iy":
+        if _is_vowel(word[word_indexer - 1]) and _is_vowel(word[word_indexer + 1]):
+            return word[word_indexer : word_indexer + 2]                         
+        if (word[:word_indexer] in _SEMICONS_I_PREFIX_GROUPS):
+            if _is_vowel(word[word_indexer + 1]):
+                return word[word_indexer : word_indexer + 2]
+            if word[word_indexer + 1] == "h" and _is_vowel(word[word_indexer + 2]):
+                return word[word_indexer : word_indexer + 3]
+    if (
+        word[word_indexer - 1] == "q" or word[word_indexer - 1] == "g"
+    ) and vowel_found == "u":
         return word[word_indexer : word_indexer + 2]
     return vowel_found
 
@@ -190,7 +202,7 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> tuple[int, str]:
     # vowel group.
     syl_bound = 0
     if num_ltrs_btw_vow_grps == 0:
-        split_case = "Hiatus or i as consonant"
+        split_case = "Hiatus or i/y as consonant"
     elif ltrs_btw_vow_grps[0] == "x":
         syl_bound = 1
         split_case = "X is double consonant"
@@ -203,10 +215,10 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> tuple[int, str]:
         else:
             split_case = "2 consonants between vowels (consonant group)"
     else:
-        if _is_consonant_group(ltrs_btw_vow_grps[:2]):
-            syl_bound = 2
+        if _is_consonant_group(ltrs_btw_vow_grps[-2:]):
+            syl_bound = num_ltrs_btw_vow_grps - 2
         else:
-            syl_bound = 1
+            syl_bound = num_ltrs_btw_vow_grps - 1
         split_case = "3+ consonants between vowels"
     return syl_bound, split_case
 
@@ -247,12 +259,15 @@ def _find_word_syl_bounds(word: str) -> "list[int]":
     for syl_bound, vg_pos_1, vg_pos_2 in zip(
         syllable_boundaries, vowel_group_pos[:-1], vowel_group_pos[1:]
     ):
-        # Find the letters between the end of the first
-        # vowel group and the start of the second vowel group.
-
-        ltrs_btw_vow_grps = word[vg_pos_1[1] : vg_pos_2[0]]
         prev_syl_bound = syl_bound
-        syl_bound_adj, split_case = _get_syl_bound_position(ltrs_btw_vow_grps)
+        if word[:vg_pos_2[0]]  in _SEMICONS_I_PREFIX_GROUPS:
+            syl_bound_adj = 1
+            split_case = "Prefix"
+        else:
+            # Find the letters between the end of the first
+            # vowel group and the start of the second vowel group.
+            ltrs_btw_vow_grps = word[vg_pos_1[1] : vg_pos_2[0]]
+            syl_bound_adj, split_case = _get_syl_bound_position(ltrs_btw_vow_grps)
         syl_bound += syl_bound_adj
         if prev_syl_bound == syl_bound:
             logging.debug(
@@ -298,3 +313,7 @@ def syllabify_word(
             return syllable_boundaries
         return []
     return "".join(split_word_by_syl_bounds(word, syllable_boundaries))
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+    syllabify_word("adiuvabit")

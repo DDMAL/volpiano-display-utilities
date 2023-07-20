@@ -18,6 +18,7 @@ from latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
 
 EXCEPTIONS_DICT = {
     "euouae": ["e-", "u-", "o-", "u-", "a-", "e"],
+    "israel": ["is-", "ra-", "el"],
 }
 
 # Pre-compiled regex patterns used in this module
@@ -84,10 +85,18 @@ def _get_text_sections(text: str) -> list[str]:
 
     returns [list[str]]: list of text sections
     """
-    return TEXT_SECTIONER_REGEX.split(text)
+    text_sections = TEXT_SECTIONER_REGEX.split(text)
+    # Somtimes splitting can result in empty strings
+    text_sections = list(filter(lambda x: x != "", text_sections))
+    return text_sections
 
 
-def syllabify_text(text: str, clean_text: bool = False) -> Union[list[str], str]:
+def syllabify_text(
+    text: str,
+    clean_text: bool = False,
+    stringify_result: bool = False,
+    flatten_result=False,
+) -> list[list[str]]:
     """
     Syllabifies a text string that has been encoded in the style
     of the Cantus Database. Texts are syllabified word by word,
@@ -97,8 +106,14 @@ def syllabify_text(text: str, clean_text: bool = False) -> Union[list[str], str]
     clean_text [bool]: if True, removes invalid characters from
         the text string; if False, raises a ValueError if invalid
         characters are detected
+    stringify_result [bool]: if True, returns a string of the
+        syllabified text instead of a list of lists with hyphens separating
+        syllables in syllabified substrings
+    flatten_result [bool]: if True, flattens the list of lists
+        into a single list of strings (syllables and unsyllabified
+        units)
 
-    returns [Union[list[str],str]]: syllabified text
+    returns [list[list[str]]]: syllabified text
     """
     logging.debug("Syllabifying text: %s", text)
     if clean_text:
@@ -146,4 +161,38 @@ def syllabify_text(text: str, clean_text: bool = False) -> Union[list[str], str]
                     elif end_hyphen:
                         syllabified_word[-1] = f"{syllabified_word[-1]}-"
                     syllabified_text.append(syllabified_word)
+    logging.debug("Syllabified text: %s", syllabified_text)
+    if stringify_result:
+        syllabified_text = stringify_syllabified_text(syllabified_text)
+    if flatten_result:
+        syllabified_text = flatten_syllabified_text(syllabified_text)
     return syllabified_text
+
+
+def flatten_syllabified_text(syllabified_text: list[list[str]]) -> list[str]:
+    """
+    Courtesy function that flattens the output of syllabify_text
+    into a single list of syllables.
+
+    syllabified_text list[list[str]]: output of syllabify_text
+
+    returns [list[str]]: flattened list of syllables
+    """
+    flattened_syl_list = []
+    for word in syllabified_text:
+        flattened_syl_list.extend(word)
+    return flattened_syl_list
+
+
+def stringify_syllabified_text(syllabified_text: list[list[str]]) -> str:
+    """
+    Courtesy function that flattens the output of syllabify_text
+    into a single string of syllables with syllables separated by
+    hyphens.
+
+    syllabified_text list[list[str]]: output of syllabify_text
+
+    returns [str]: flattened string of syllables
+    """
+    word_list = ["".join(word) for word in syllabified_text]
+    return " ".join(word_list)
