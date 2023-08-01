@@ -18,7 +18,7 @@ from latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
 
 EXCEPTIONS_DICT = {
     "euouae": ["e-", "u-", "o-", "u-", "a-", "e"],
-    "israel": ["is-", "ra-", "el"],
+    "israelitis": ["is-", "ra-", "e-", "li-", "tis"],
 }
 
 # Pre-compiled regex patterns used in this module
@@ -54,7 +54,7 @@ def _detect_invalid_characters(text: str) -> bool:
     return bool(INVALID_CHAR_REGEX.search(text))
 
 
-def _prepare_string_for_syllabification(word_str: str) -> tuple[str, bool, bool]:
+def _prepare_string_for_syllabification(word_str: str) -> "tuple[str, bool, bool]":
     """
     Complete preparation of a string before syllabification.
     All letters are converted to lowercase. Hyphens are removed
@@ -73,7 +73,7 @@ def _prepare_string_for_syllabification(word_str: str) -> tuple[str, bool, bool]
     return word_str, bool(start_hyphen), bool(end_hyphen)
 
 
-def _get_text_sections(text: str) -> list[str]:
+def _get_text_sections(text: str) -> "list[str]":
     """
     Splits a text string into sections based on the presence of
     curly braces "{}", square brackets "[]",
@@ -96,7 +96,7 @@ def syllabify_text(
     clean_text: bool = False,
     stringify_result: bool = False,
     flatten_result=False,
-) -> list[list[str]]:
+) -> "list[list[str]]":
     """
     Syllabifies a text string that has been encoded in the style
     of the Cantus Database. Texts are syllabified word by word,
@@ -169,7 +169,7 @@ def syllabify_text(
     return syllabified_text
 
 
-def flatten_syllabified_text(syllabified_text: list[list[str]]) -> list[str]:
+def flatten_syllabified_text(syllabified_text: "list[list[str]]") -> "list[str]":
     """
     Courtesy function that flattens the output of syllabify_text
     into a single list of syllables.
@@ -184,7 +184,7 @@ def flatten_syllabified_text(syllabified_text: list[list[str]]) -> list[str]:
     return flattened_syl_list
 
 
-def stringify_syllabified_text(syllabified_text: list[list[str]]) -> str:
+def stringify_syllabified_text(syllabified_text: "list[list[str]]") -> str:
     """
     Courtesy function that flattens the output of syllabify_text
     into a single string of syllables with syllables separated by

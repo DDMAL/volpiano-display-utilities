@@ -31,7 +31,7 @@ from typing import Union
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
-_CONSONANT_GROUPS = ["ch", "ph", "th", "rh", "gn"] + [
+_CONSONANT_GROUPS = ["ch", "ph", "th", "rh", "gn", "qu", "gu"] + [
     x[0] + x[1] for x in itertools.product("pbtdcfg", "lr")
 ]
 
@@ -40,16 +40,9 @@ _DIPTHONGS = [
     "au",
     "oe",
 ]
-_VOWELS = [
-    "a",
-    "e",
-    "i",
-    "o",
-    "u",
-    "y",
-]
-_SEMICONS_I_PREFIX_GROUPS = [
-    "","h","ab","ob","ad","per","sub","in","con"
+
+_PREFIX_GROUPS = [
+    "","ab","ob","ad","per","sub","in","con"
 ]
 
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
@@ -78,15 +71,44 @@ def split_word_by_syl_bounds(word: str, syl_bounds: "list[int]") -> "list[str]":
     return syllables
 
 
-def _is_vowel(char: str) -> bool:
+def _get_vowel_group_pos(word: str, word_indexer: int) -> "tuple[int,int]":
     """
-    Checks if a character is a vowel.
+    Much of the time, a vowel is one of the letters
+    "a", "e", "i", "o", "u", "y". At times, however, a vowel might
+    be a semi-vowel, and therefore not treated as a vowel
+    for the purposes of syllabification. This function
+    checks if a vowel character functions as a vowel or 
+    as a semi-vowel based on its context.
 
-    char [str]: character to check
+    word [str]: word being syllabified
+    word_indexer [int]: index of character to check in word
 
     returns [bool]: True if char is a vowel, False otherwise
     """
-    return char in _VOWELS
+    char = word[word_indexer]
+    if (word_indexer == len(word) - 1) or (char == "j" and word[word_indexer - 1] == "i"):
+        return (word_indexer, word_indexer + 1)
+    # If letter is "u", it is a vowel unless:
+    # 1. preceded by "q" or "g" and followed by a vowel, or
+    # 2. preceded and followed by a vowel ("u" is "v" in this case)
+    if char == "u":
+        if (word[word_indexer - 1] in "qgaeiouy") and (word[word_indexer + 1] in "aeiouy"):
+            return (word_indexer + 1, word_indexer + 2)
+    # If letter is "y" or "i", it is a vowel unless:
+    # 1. at the start of the word, followed by "h" + vowel, or
+    # 2. preceded by a vowel or "h" and followed by a vowel
+    # 3. it begins a word stem and is followed by a vowel
+    if char in "iy":
+        if (word[:word_indexer + 2] in ["ih", "yh"]) and (word[word_indexer + 2] in "aeiouy"):
+            return (word_indexer + 2, word_indexer + 3)
+        if (word[word_indexer + 1] in "aeouy") and (word[:word_indexer] in _PREFIX_GROUPS or word[word_indexer - 1] in "aeiouyh"):
+            return (word_indexer + 1, word_indexer + 2)
+    if word[word_indexer:] == "ael":
+        return (word_indexer, word_indexer + 1)
+    if word[word_indexer: word_indexer + 2] in _DIPTHONGS:
+        return (word_indexer, word_indexer + 2)
+    return (word_indexer, word_indexer + 1)
+
 
 
 def _is_consonant_group(chars: str) -> bool:
@@ -100,50 +122,6 @@ def _is_consonant_group(chars: str) -> bool:
     """
     return chars in _CONSONANT_GROUPS
 
-
-def _get_vowel_group(word: str, word_indexer: int) -> str:
-    """
-    Gets the entire vowel group starting at specific index.
-
-    word [str]: word to get vowel group from
-    word_indexer [int]: index of first vowel in vowel group
-
-    returns [str]: vowel group
-    """
-    # Start vowel group with identified vowel
-    vowel_found = word[word_indexer]
-    # If at the end of the word, return the vowel.
-    if word_indexer == len(word) - 1:
-        return vowel_found
-    # If the following letter is not a vowel, return the single vowel.
-    if not _is_vowel(word[word_indexer + 1]) and word[word_indexer + 1] != "h":
-        return vowel_found
-    # If following letter is a vowel, there are four possibilities:
-    # 1. the two vowels are a dipthong
-    # 2. the two vowels are a diaeresis
-    # 3. the two vowels are part of a vowel + i + vowel construction,
-    #    in which case the first vowel is the only vowel in the group and
-    #    the i is a consonant.
-    # 4. the two vowels are part of a qu + vowel construction, in which case
-    #    the final vowel is the only vowel in the group and the qu is a
-    #    consonant.
-    if f"{vowel_found}{word[word_indexer + 1]}" in _DIPTHONGS:
-        return word[word_indexer : word_indexer + 2]
-    if vowel_found in "iy":
-        if _is_vowel(word[word_indexer - 1]) and _is_vowel(word[word_indexer + 1]):
-            return word[word_indexer : word_indexer + 2]                         
-        if (word[:word_indexer] in _SEMICONS_I_PREFIX_GROUPS):
-            if _is_vowel(word[word_indexer + 1]):
-                return word[word_indexer : word_indexer + 2]
-            if word[word_indexer + 1] == "h" and _is_vowel(word[word_indexer + 2]):
-                return word[word_indexer : word_indexer + 3]
-    if (
-        word[word_indexer - 1] == "q" or word[word_indexer - 1] == "g"
-    ) and vowel_found == "u":
-        return word[word_indexer : word_indexer + 2]
-    return vowel_found
-
-
 def _get_vowel_group_positions(word: str) -> "list[tuple[int, int]]":
     """
     Gets the positions of the vowel groups in a word.
@@ -153,19 +131,19 @@ def _get_vowel_group_positions(word: str) -> "list[tuple[int, int]]":
     returns [list[int]]: list of positions of vowel groups; positions are
         tuples of the form (start index, end index).
     """
-    vowel_group_pos = []
+    vowel_group_positions = []
     word_indexer = 0
     while word_indexer < len(word):
-        if _is_vowel(word[word_indexer]):
-            vowel_group = _get_vowel_group(word, word_indexer)
-            vowel_group_pos.append((word_indexer, word_indexer + len(vowel_group)))
-            word_indexer += len(vowel_group)
+        if word[word_indexer] in "aeiouyj":
+            vowel_group_pos = _get_vowel_group_pos(word, word_indexer)
+            vowel_group_positions.append(vowel_group_pos)
+            word_indexer = vowel_group_pos[1]
             continue
         word_indexer += 1
-    return vowel_group_pos
+    return vowel_group_positions
 
 
-def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> tuple[int, str]:
+def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> "tuple[int, str]":
     """
     Find the adjustment required to a syllable boundary between
     two vowel groups based on the letters between them.
@@ -240,15 +218,15 @@ def _find_word_syl_bounds(word: str) -> "list[int]":
 
     # Each syllable has one and only one vowel group, so
     # we start by finding the positions of those vowel groups.
-    vowel_group_pos = _get_vowel_group_positions(word)
-    if len(vowel_group_pos) == 1:
+    vgps = _get_vowel_group_positions(word)
+    if len(vgps) == 1:
         logging.debug("### Final word syllabification: %s", word)
         return None
     # We start by assuming that the syllable boundaries of the word
     # are at the end of each vowel group (except the final group, which ends
     # at the end of the word). We then modify these boundaries
     # in cases where there is more than one consonant between two vowel groups.
-    syllable_boundaries = [x[1] for x in vowel_group_pos[:-1]]
+    syllable_boundaries = [x[1] for x in vgps[:-1]]
     logging.debug(
         "### Vowel group split: %s",
         "".join(split_word_by_syl_bounds(word, syllable_boundaries)),
@@ -257,10 +235,10 @@ def _find_word_syl_bounds(word: str) -> "list[int]":
     # letter between the two vowel groups, we determine how to move the syllable boundary.
     ed_syllable_boundaries = []
     for syl_bound, vg_pos_1, vg_pos_2 in zip(
-        syllable_boundaries, vowel_group_pos[:-1], vowel_group_pos[1:]
+        syllable_boundaries, vgps[:-1], vgps[1:]
     ):
         prev_syl_bound = syl_bound
-        if word[:vg_pos_2[0]]  in _SEMICONS_I_PREFIX_GROUPS:
+        if word[:vg_pos_2[0]]  in _PREFIX_GROUPS:
             syl_bound_adj = 1
             split_case = "Prefix"
         else:
@@ -316,4 +294,4 @@ def syllabify_word(
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    syllabify_word("adiuvabit")
+    syllabify_word("subiit")

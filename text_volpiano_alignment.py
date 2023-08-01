@@ -52,7 +52,7 @@ def _preprocess_volpiano(volpiano_str: str) -> str:
     logging.debug("Preprocessed volpiano string: %s", processed_str)
     return processed_str
 
-def _postprocess_spacing(comb_text_and_vol: list[tuple[str, str]]) -> list[tuple[str, str]]:
+def _postprocess_spacing(comb_text_and_vol: "list[tuple[str, str]]") -> "list[tuple[str, str]]":
     """
     Handle some special spacing requirements for optimal display
     of volpiano with chant text.
@@ -77,7 +77,7 @@ def _postprocess_spacing(comb_text_and_vol: list[tuple[str, str]]) -> list[tuple
         comb_text_and_vol_rev_spacing.append((text_elem, vol_elem))
     return comb_text_and_vol_rev_spacing
 
-def _align_word(text_word:list[str], volpiano_word:str) -> list[tuple[str, str]]:
+def _align_word(text_word:"list[str]", volpiano_word:str) -> "list[tuple[str, str]]":
     txt_word = text_word
     vol_syls = re.findall(r".*?-{2,3}", volpiano_word)
     if len(txt_word) > len(vol_syls):
@@ -87,7 +87,7 @@ def _align_word(text_word:list[str], volpiano_word:str) -> list[tuple[str, str]]
     comb_wrd = list(zip_longest(txt_word, vol_syls, fillvalue=""))
     return comb_wrd
 
-def _align_section(text_section:list[list[str]], volpiano_section:str) -> list[tuple[str, str]]:
+def _align_section(text_section:"list[list[str]]", volpiano_section:str) -> "list[tuple[str, str]]":
     logging.debug("Aligning section: %s", text_section)
     logging.debug("Volpiano section: %s", volpiano_section)
     comb_section = []
@@ -106,7 +106,7 @@ def _align_section(text_section:list[list[str]], volpiano_section:str) -> list[t
     logging.debug("Aligned section: %s", comb_section)
     return comb_section
 
-def _get_text_sections_for_alignment(syllabified_text: list[list[str]]) -> list[str]:
+def _get_text_sections_for_alignment(syllabified_text: "list[list[str]]") -> "list[str]":
     text_sections = []
     section = []
     txt_wrd_iter = 0

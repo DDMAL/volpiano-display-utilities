@@ -90,6 +90,16 @@ class TestWordSyllabification(unittest.TestCase):
             "ihesum": [3],
             "adiuvabit": [2, 4, 6],
             "mihi": [2],
+            "levavi": [2,4],
+            "leuaui": [2,4],
+            "uniuersi": [1,3,6],
+            "labijs": [2,4],
+            "labiis": [2,4],
+            "filij": [2,4],
+            "filii": [2,4],
+            "subiit": [3,4],
+            "israel": [2,4],
+            "michael": [2,5],
         }
         for word, expected in test_words.items():
             with self.subTest(word=word):
