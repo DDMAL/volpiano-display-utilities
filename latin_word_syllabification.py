@@ -1,13 +1,11 @@
 """
-A utility to syllabify Latin words stored in
-Cantus Database. As a result, this utility assumes latin transcription
-conventions of CantusDB (found in the "Text Entry and Editing" pdf
-at https://cantus.uwaterloo.ca/documents) which include both standardized
-classical latin spelling and non-standardized (ie. what is 
-actually in the manuscript) spellings. Consult the README for more
-details.
-
-Use syllabify_word to syllabify a word.
+Module provides a function, syllabify_word, that syllabifies a Latin word. Although
+this function does not assume any specific spelling convention, it was 
+developed for use syllabifying texts (with both standard and non-standard spellings)
+entered in Cantus Database. As such, familiarity with the conventions of Cantus
+Database may be helpful; details can be found in the "Text Entry and Editing" pdf
+at https://www.cantusdatabase.org/documents). Consult the README for more
+details about the syllabification logic implemented in this function.
 
 syllabify_word(word, return_syllabified_string = False) 
     word [str]: string to syllabify
@@ -31,19 +29,13 @@ from typing import Union
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
-_CONSONANT_GROUPS = ["ch", "ph", "th", "rh", "gn", "qu", "gu"] + [
+_CONSONANT_GROUPS = ["ch", "ph", "th", "rh", "gn", "qu", "gu", "nc", "mp", "sc"] + [
     x[0] + x[1] for x in itertools.product("pbtdcfg", "lr")
 ]
 
-_DIPTHONGS = [
-    "ae",
-    "au",
-    "oe",
-]
-
-_PREFIX_GROUPS = [
-    "","ab","ob","ad","per","sub","in","con"
-]
+# Prefix groups are groups of characters that serve as common prefixes. For details,
+# see README.
+_PREFIX_GROUPS = ["ab", "ob", "ad", "per", "sub", "in", "con"]
 
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
 
@@ -71,76 +63,105 @@ def split_word_by_syl_bounds(word: str, syl_bounds: "list[int]") -> "list[str]":
     return syllables
 
 
-def _get_vowel_group_pos(word: str, word_indexer: int) -> "tuple[int,int]":
+def _get_prefixes(word: str) -> str:
     """
-    Much of the time, a vowel is one of the letters
-    "a", "e", "i", "o", "u", "y". At times, however, a vowel might
-    be a semi-vowel, and therefore not treated as a vowel
-    for the purposes of syllabification. This function
-    checks if a vowel character functions as a vowel or 
-    as a semi-vowel based on its context.
+    Returns the profix of a word, if it has one.
 
-    word [str]: word being syllabified
-    word_indexer [int]: index of character to check in word
+    word [str]: word to check for prefix
 
-    returns [bool]: True if char is a vowel, False otherwise
+    returns [str]: the word prefix. If word has no prefix, returns
+        empty string.
     """
-    char = word[word_indexer]
-    if (word_indexer == len(word) - 1) or (char == "j" and word[word_indexer - 1] == "i"):
-        return (word_indexer, word_indexer + 1)
-    # If letter is "u", it is a vowel unless:
-    # 1. preceded by "q" or "g" and followed by a vowel, or
-    # 2. preceded and followed by a vowel ("u" is "v" in this case)
-    if char == "u":
-        if (word[word_indexer - 1] in "qgaeiouy") and (word[word_indexer + 1] in "aeiouy"):
-            return (word_indexer + 1, word_indexer + 2)
-    # If letter is "y" or "i", it is a vowel unless:
-    # 1. at the start of the word, followed by "h" + vowel, or
-    # 2. preceded by a vowel or "h" and followed by a vowel
-    # 3. it begins a word stem and is followed by a vowel
-    if char in "iy":
-        if (word[:word_indexer + 2] in ["ih", "yh"]) and (word[word_indexer + 2] in "aeiouy"):
-            return (word_indexer + 2, word_indexer + 3)
-        if (word[word_indexer + 1] in "aeouy") and (word[:word_indexer] in _PREFIX_GROUPS or word[word_indexer - 1] in "aeiouyh"):
-            return (word_indexer + 1, word_indexer + 2)
-    if word[word_indexer:] == "ael":
-        return (word_indexer, word_indexer + 1)
-    if word[word_indexer: word_indexer + 2] in _DIPTHONGS:
-        return (word_indexer, word_indexer + 2)
-    return (word_indexer, word_indexer + 1)
+    for prefix in _PREFIX_GROUPS:
+        # If the word is itself one of the prefixes (eg. "in" can
+        # be a word or a prefix), doen't return a prefix
+        if word.startswith(prefix) and (word != prefix):
+            return prefix
+    return ""
 
 
-
-def _is_consonant_group(chars: str) -> bool:
+def _replace_semivowels_and_v(word: str) -> str:
     """
-    Checks if a string is a consonant group.
+    Replaces the characters "u", "i", and "y" with other characters
+    if they serve as consonants or semivowels. This allows the syllabification
+    algorithm to skip them when finding vowels. For details on semivowels
+    and "u"/"v", see README.
 
-    chars [str]: string to check
+    Where "i" or "y" are serving as semivowels, they are replaced with "j".
+    Where "u" is serving as a semivowel, it is replaced with "w".
+    Where "u" is serving as a consonant, it is replaced with "v".
 
-    returns [bool]: True if chars is a consonant group,
-        False otherwise
+    word [str]: word to replace characters in
+
+    returns [str]: word with characters replaced
     """
-    return chars in _CONSONANT_GROUPS
+    word_w_repl = ""
+    # Handle first character in the word
+    first_let = word[0]
+    if (first_let in "y") and (word[1] in "aeiouyh"):
+        word_w_repl += "j"
+    elif (first_let == "i") and (word[1] in "aeouyh"):
+        word_w_repl += "j"
+    elif (first_let == "u") and (word[1] in "aeiouy"):
+        word_w_repl += "v"
+    else:
+        word_w_repl += first_let
+    word = word[1:]
+    # Handle remaining characters
+    while word != "":
+        char = word[0]
+        if char not in "iyu" or len(word) == 1:
+            word_w_repl += char
+        elif char in "iy":
+            if ((word_w_repl[-1] in "aeu") and (word[1] in "aeu")) or (
+                (word_w_repl[-2:] not in _CONSONANT_GROUPS)
+                and (word_w_repl[-1] == "h")
+                and (word[1] in "aeiouy")
+            ):
+                word_w_repl += "j"
+            else:
+                word_w_repl += "i"
+        elif char == "u":
+            if word_w_repl[-1] in "qg" and word[1] in "aeiouy":
+                word_w_repl += "w"
+            elif word_w_repl[-1] in "aeiouy" and word[1] in "aeiouy":
+                word_w_repl += "v"
+            else:
+                word_w_repl += "u"
+        word = word[1:]
+    return word_w_repl
 
-def _get_vowel_group_positions(word: str) -> "list[tuple[int, int]]":
+
+def _get_vowel_positions(word: str) -> "list[int]":
     """
-    Gets the positions of the vowel groups in a word.
+    Gets the positions of vowels in a word.
+
+    Vowels are "a", "e", "i", "o", "u", "y" and long "i" (written "j"),
+    except in such cases where "i"/"j" and "u" are semi-vowels or the written
+    "u" is pronounced "v." We temporarily replace these characters in those cases
+    with other consonants when finding vowel positions.
 
     word [str]: word to get vowel groups from
 
-    returns [list[int]]: list of positions of vowel groups; positions are
-        tuples of the form (start index, end index).
+    returns [list[int]]: list of string indices of vowels in word
     """
-    vowel_group_positions = []
+    # Replace long "i" ("j") with "i" for the purposes of finding vowels.
+    # Note: places where a semi-vowel was transcribed "j" will be handled
+    # by the _replace_semivowels function.
+    word = word.replace("j", "i")
+    # Replace semi-vowelsn for the purposes of finding vowels.
+    word = _replace_semivowels_and_v(word)
+    logging.debug("Semivowels, long i's, v's found: %s", word)
+    vowel_positions = []
     word_indexer = 0
     while word_indexer < len(word):
-        if word[word_indexer] in "aeiouyj":
-            vowel_group_pos = _get_vowel_group_pos(word, word_indexer)
-            vowel_group_positions.append(vowel_group_pos)
-            word_indexer = vowel_group_pos[1]
-            continue
-        word_indexer += 1
-    return vowel_group_positions
+        char = word[word_indexer]
+        if char in "aeiouy":
+            vowel_positions.append(word_indexer)
+            word_indexer += 1
+        else:
+            word_indexer += 1
+    return vowel_positions
 
 
 def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> "tuple[int, str]":
@@ -180,28 +201,28 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> "tuple[int, str]":
     # vowel group.
     syl_bound = 0
     if num_ltrs_btw_vow_grps == 0:
-        split_case = "Hiatus or i/y as consonant"
+        split_case = "Hiatus"
     elif ltrs_btw_vow_grps[0] == "x":
         syl_bound = 1
         split_case = "X is double consonant"
     elif num_ltrs_btw_vow_grps == 1:
         split_case = "1 consonant between vowels"
     elif num_ltrs_btw_vow_grps == 2:
-        if not _is_consonant_group(ltrs_btw_vow_grps):
+        if ltrs_btw_vow_grps not in _CONSONANT_GROUPS:
             syl_bound = 1
             split_case = "2 consonants between vowels"
         else:
             split_case = "2 consonants between vowels (consonant group)"
     else:
-        if _is_consonant_group(ltrs_btw_vow_grps[-2:]):
-            syl_bound = num_ltrs_btw_vow_grps - 2
+        if ltrs_btw_vow_grps[:2] in _CONSONANT_GROUPS:
+            syl_bound = 2
         else:
-            syl_bound = num_ltrs_btw_vow_grps - 1
+            syl_bound = 1
         split_case = "3+ consonants between vowels"
     return syl_bound, split_case
 
 
-def _find_word_syl_bounds(word: str) -> "list[int]":
+def _syllabify(word: str) -> "list[int]":
     """
     Finds indices of the syllable boundaries of a word.
     See README for details on syllabification rules.
@@ -212,86 +233,97 @@ def _find_word_syl_bounds(word: str) -> "list[int]":
     """
     logging.debug("Finding syllables: %s", word)
 
+    syllable_boundaries = []
+
     if len(word) <= 1:
         logging.debug("### Final word syllabification: %s", word)
-        return None
+        return syllable_boundaries
 
-    # Each syllable has one and only one vowel group, so
-    # we start by finding the positions of those vowel groups.
-    vgps = _get_vowel_group_positions(word)
-    if len(vgps) == 1:
-        logging.debug("### Final word syllabification: %s", word)
-        return None
+    word_prefix = _get_prefixes(word)
+    word_prefix_length = len(word_prefix)
+    if word_prefix:
+        syllable_boundaries.append(word_prefix_length)
+        word_stem = word[len(word_prefix) :]
+        word_prefix += "-"
+        logging.debug("### Word prefix: %s", word_prefix)
+    else:
+        word_stem = word
+    # Each syllable has one and only one vowel (either a
+    # single vowel or a dipthong), so we start by finding
+    # the positions of vowels. We will combine dipthongs later.
+    vow_pos = _get_vowel_positions(word_stem)
+    if len(vow_pos) == 1:
+        logging.debug("### Final word syllabification: %s%s", word_prefix, word_stem)
+        return syllable_boundaries
     # We start by assuming that the syllable boundaries of the word
     # are at the end of each vowel group (except the final group, which ends
     # at the end of the word). We then modify these boundaries
     # in cases where there is more than one consonant between two vowel groups.
-    syllable_boundaries = [x[1] for x in vgps[:-1]]
+    init_syllable_boundaries = [x + 1 for x in vow_pos[:-1]]
     logging.debug(
-        "### Vowel group split: %s",
-        "".join(split_word_by_syl_bounds(word, syllable_boundaries)),
+        "### Word stem vowel group split: %s",
+        "".join(split_word_by_syl_bounds(word_stem, init_syllable_boundaries)),
     )
     # We iterate through successive pairs of vowel groups, and if there is more than one
     # letter between the two vowel groups, we determine how to move the syllable boundary.
-    ed_syllable_boundaries = []
-    for syl_bound, vg_pos_1, vg_pos_2 in zip(
-        syllable_boundaries, vgps[:-1], vgps[1:]
+    for syl_bound, v_pos_1, v_pos_2 in zip(
+        init_syllable_boundaries, vow_pos[:-1], vow_pos[1:]
     ):
         prev_syl_bound = syl_bound
-        if word[:vg_pos_2[0]]  in _PREFIX_GROUPS:
-            syl_bound_adj = 1
-            split_case = "Prefix"
-        else:
-            # Find the letters between the end of the first
-            # vowel group and the start of the second vowel group.
-            ltrs_btw_vow_grps = word[vg_pos_1[1] : vg_pos_2[0]]
-            syl_bound_adj, split_case = _get_syl_bound_position(ltrs_btw_vow_grps)
+        # If two vowels are adjacent, check for a dipthong.
+        if v_pos_2 - 1 == v_pos_1:
+            dipthong = word_stem[v_pos_1 : v_pos_2 + 1]
+            if dipthong in ["ae", "oe", "au"]:
+                syl_bound += 1
+                logging.debug(
+                    "### CASE: Dipthong. %s --> %s",
+                    f"{word_stem[:prev_syl_bound]}-{word_stem[prev_syl_bound:]}",
+                    f"{word_stem[:syl_bound]}-{word_stem[syl_bound:]}",
+                )
+                continue
+        ltrs_btw_vow_grps = word_stem[v_pos_1 + 1 : v_pos_2]
+        syl_bound_adj, split_case = _get_syl_bound_position(ltrs_btw_vow_grps)
         syl_bound += syl_bound_adj
         if prev_syl_bound == syl_bound:
             logging.debug(
                 "### CASE: %s. No change: %s",
                 split_case,
-                f"{word[:syl_bound]}-{word[syl_bound:]}",
+                f"{word_stem[:syl_bound]}-{word_stem[syl_bound:]}",
             )
         else:
             logging.debug(
                 "### CASE: %s. %s --> %s",
                 split_case,
-                f"{word[:prev_syl_bound]}-{word[prev_syl_bound:]}",
-                f"{word[:syl_bound]}-{word[syl_bound:]}",
+                f"{word_stem[:prev_syl_bound]}-{word_stem[prev_syl_bound:]}",
+                f"{word_stem[:syl_bound]}-{word_stem[syl_bound:]}",
             )
-        ed_syllable_boundaries.append(syl_bound)
+        syllable_boundaries.append(syl_bound + word_prefix_length)
     logging.debug(
         "### Final word syllabification: %s",
-        "".join(split_word_by_syl_bounds(word, ed_syllable_boundaries)),
+        "".join(split_word_by_syl_bounds(word, syllable_boundaries)),
     )
-    return ed_syllable_boundaries
+    return syllable_boundaries
 
 
-def syllabify_word(
-    word: str, return_syllabified_string: bool = False
-) -> Union["list[int]", str]:
+def syllabify_word(word: str, return_string: bool = False) -> Union["list[int]", str]:
     """
     See README for details on syllabification rules.
 
-    word [str]: word to syllabify
-    return_syllabified_string [bool]: see return value. Default is False.
+    word [str]: word (containing only latin alphabetic characters) to syllabify
+    return_string [bool]: see return value. Default is False.
 
     returns [list[int] or str]: By default, returns a list of integers representing
         the indices of the syllable boundaries of word. Indices indicate the letter that begins
         the syllable. For example, the word "podatus" would return [2, 4] (po-da-tus).
-        If a one-syllable word is passed, returns an empty list. If return_syllabified_string
+        If a one-syllable word is passed, returns an empty list. If return_string
         is True, returns a string with hyphens inserted at the syllable boundaries.
     """
+    if not isinstance(word, str):
+        raise TypeError(f"Word must be a string. Got {type(word)}.")
     if LATIN_ALPH_REGEX.search(word):
         raise ValueError(f"Word {word} contains non-alphabetic characters.")
-    syllable_boundaries = _find_word_syl_bounds(word)
-    if not return_syllabified_string:
-        if syllable_boundaries:
-            return syllable_boundaries
-        return []
-    return "".join(split_word_by_syl_bounds(word, syllable_boundaries))
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    syllabify_word("subiit")
+    lowercase_word = word.lower()
+    syllable_boundaries = _syllabify(lowercase_word)
+    if return_string:
+        return "".join(split_word_by_syl_bounds(word, syllable_boundaries))
+    return syllable_boundaries

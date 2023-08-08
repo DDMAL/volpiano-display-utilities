@@ -148,7 +148,7 @@
     {
         "case_name": "Test alignment: text with incipit",
         "text_input": "in diebus | ~eius | obsessa | ~est",
-        "vol_input": "1---f---df--f--f---3---f---efgfe---3---g--hg-hgf--ef-gef---4---ed---4",
+        "vol_input": "1---f---df--f--f---3---f--efgfe---3---g--hg-hgf--ef-gef---4---ed---4",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -156,7 +156,7 @@
             ["e-", "f--"],
             ["bus", "f---"],
             ["|","3---"],
-            ["~eius", "f---efgfe---"],
+            ["~eius", "f--efgfe---"],
             ["|", "3---"],
             ["ob-", "g--"],
             ["ses-", "hg-hgf--"],
@@ -169,7 +169,7 @@
     {
         "case_name": "Test alignment: text with ipsum",
         "text_input": "in diebus eius | ~Ipsum [obsessa est]",
-        "vol_input": "1---f---df--f--f---f--efgfe---4---g--hg-hgf--ef-gef---ed---4",
+        "vol_input": "1---f---df--f--f---f--efgfe---4---g--hg--hgf--ef--gef--ed---4",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -179,7 +179,7 @@
             ["e-", "f--"],
             ["ius", "efgfe---"],
             ["|", "4---"],
-            ["~Ipsum[obsessa est]", "g--hg-hgf--ef-gef---ed---"],
+            ["~Ipsum [obsessa est]", "g--hg--hgf--ef--gef--ed---"],
             ["", "4"]
         ]
     }
