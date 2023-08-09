@@ -98,14 +98,18 @@ def _replace_semivowels_and_v(word: str) -> str:
     word_w_repl = ""
     # Handle first character in the word
     first_let = word[0]
-    if (first_let in "y") and (word[1] in "aeiouyh"):
-        word_w_repl += "j"
-    elif (first_let == "i") and (word[1] in "aeouyh"):
-        word_w_repl += "j"
-    elif (first_let == "u") and (word[1] in "aeiouy"):
-        word_w_repl += "v"
-    else:
-        word_w_repl += first_let
+    try:
+        if (first_let in "y") and (word[1] in "aeiou"):
+            word_w_repl += "j"
+        elif (first_let == "i") and ((word[1] in "aeou") or (word[1] == "h" and word[2] in "aeo")):
+            word_w_repl += "j"
+        elif (first_let == "u") and (word[1] in "aeiouy"):
+            word_w_repl += "v"
+        else:
+            word_w_repl += first_let
+    except IndexError:
+        # IndexError will only occur on "ih"
+        return word
     word = word[1:]
     # Handle remaining characters
     while word != "":
@@ -113,10 +117,10 @@ def _replace_semivowels_and_v(word: str) -> str:
         if char not in "iyu" or len(word) == 1:
             word_w_repl += char
         elif char in "iy":
-            if ((word_w_repl[-1] in "aeu") and (word[1] in "aeu")) or (
+            if ((word_w_repl[-1] in "aeou") and (word[1] in "aeou")) or (
                 (word_w_repl[-2:] not in _CONSONANT_GROUPS)
                 and (word_w_repl[-1] == "h")
-                and (word[1] in "aeiouy")
+                and (word[1] in "eou")
             ):
                 word_w_repl += "j"
             else:
@@ -149,7 +153,7 @@ def _get_vowel_positions(word: str) -> "list[int]":
     # Note: places where a semi-vowel was transcribed "j" will be handled
     # by the _replace_semivowels function.
     word = word.replace("j", "i")
-    # Replace semi-vowelsn for the purposes of finding vowels.
+    # Replace semi-vowels for the purposes of finding vowels.
     word = _replace_semivowels_and_v(word)
     logging.debug("Semivowels, long i's, v's found: %s", word)
     vowel_positions = []
@@ -162,7 +166,6 @@ def _get_vowel_positions(word: str) -> "list[int]":
         else:
             word_indexer += 1
     return vowel_positions
-
 
 def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> "tuple[int, str]":
     """
@@ -327,3 +330,8 @@ def syllabify_word(word: str, return_string: bool = False) -> Union["list[int]",
     if return_string:
         return "".join(split_word_by_syl_bounds(word, syllable_boundaries))
     return syllable_boundaries
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+    print(syllabify_word("ih"))

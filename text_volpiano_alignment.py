@@ -67,11 +67,6 @@ def _postprocess_spacing(
     Ensures that:
      - the length of missing music sections responds to the length of
         the text associated with the section
-    - where an aligned element with overhanging text is following by
-        an aligned element with overhanging volpiano (or vice versa),
-        the elements are re-aligned to match the complementary overhangs
-        e.g.: "a-men a-men" & "1---f---g--f--g---3" is realigned to
-              "a-men a-men" & "1---f--g---f--g---3"
 
     comb_text_and_vol [list[tuple[str, str]]]:
         list of tuples of text syllables and volpiano syllables
