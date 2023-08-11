@@ -21,7 +21,7 @@ The respository consists of three main utilities:
 
 The function returns a nested list of strings with the following structure (see diagram):
  - each element of the list is a sublist that contains the syllabification of a section of the chant text. Sections are created when signaled in the chant text by pipes ("|") or when a substring of the chant text should not be syllabified (eg. when it corresponds to missing music -- these are detailed below)
- - each section list is a list of words (for sections where syllabification is necessary) or a singleton list for the whole section (for sections where syllabification is not necessary)
+ - each section list is a list of words (for sections where syllabification is necessary) or a list with one element for the whole section (for sections where syllabification is not necessary)
  - each word is a list of syllable strings (if the word needs to be syllabified)
 
 ```{mermaid}
