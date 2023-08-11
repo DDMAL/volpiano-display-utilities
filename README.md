@@ -80,7 +80,7 @@ The alignment algorithm also adapts the size of missing music sections in the vo
 '[3]' # Returns a list of index positions of syllable break
 >>> syllabify_word("alleluia")
 '[2,4,6]' 
->>> syllabify_word("alleluia", return_tring = True)
+>>> syllabify_word("alleluia", return_string = True)
 'al-le-lu-ia' # Return string hyphenated at internal syllable boundaries
 >>> syllabify_word("qui")
 '[]' # Single-syllable words return an empty list
