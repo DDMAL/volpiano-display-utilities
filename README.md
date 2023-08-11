@@ -16,7 +16,7 @@ The respository consists of three main utilities:
 >>> syllabify_text("Agnus dei qui {tollis peccata} mundi | Miserere # | ~Agnus")
 '[[["Ag-","nus"], ["de-","i"], ["qui"]], [["{tollis peccata}"]], [["mun-","di"]], [["|"]], [["Mi-","se-","re-","re"], ["#"]], [["|"]], [["~Agnus"]]]'
 >>> syllabify_text("Glori@ patr1 &t")
-'ValueError: ...' # Input with invalid characters will return a value error. 
+'ValueError: ...' # Input with invalid characters will raise a value error. 
 ```
 
 The function returns a nested list of strings with the following structure (see diagram):
@@ -58,7 +58,7 @@ Aligning chant texts with melodies requires most words in the chant to be syllab
  2. Music is missing. Text associated with missing music is enclosed within curly braces ("{" and "}"). It is aligned with a section of blank staff but is not syllabified.
  3. The chant text includes an incipits. Incipits are prefixed by a tilde ("~") and/or enclosed in square brackets ("[","]"). These are aligned with music for the incipt but are not syllabified. 
 
-More details about text entry in Cantus Database can be found at https://cantus.uwaterloo.ca/documents
+More details about text entry in Cantus Database can be found at https://cantusdatabase.org/documents
 
 ### Alignment Logic
 
