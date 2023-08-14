@@ -34,15 +34,15 @@ STR_ENDS_W_HYPHEN_REGEX = re.compile(r"\-$")
 TEXT_SECTIONER_REGEX = re.compile(r"(\|)|(\{.*?\})(?!\s*?\{)")
 
 
-def _clean_text(test: str) -> str:
+def _clean_text(text: str) -> str:
     """
     Removes invalid characters from the text string.
 
-    test [str]: string to clean
+    text [str]: string to clean
 
     returns [str]: cleaned string
     """
-    return INVALID_CHAR_REGEX.sub("", test)
+    return INVALID_CHAR_REGEX.sub("", text)
 
 
 def _detect_invalid_characters(text: str) -> bool:
@@ -110,7 +110,7 @@ def syllabify_text(
         the text string; if False, raises a ValueError if invalid
         characters are detected
     flatten_result [bool]: if True, returns a string of the
-        syllabified text instead of a list of lists with hyphens separating
+        syllabified text (instead of a list of lists) with hyphens separating
         syllables in syllabified substrings. See returns for more details.
 
     returns [list[list[list[str]]] or str]: by default, a nested list of strings.

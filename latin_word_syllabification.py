@@ -101,7 +101,9 @@ def _replace_semivowels_and_v(word: str) -> str:
     try:
         if (first_let in "y") and (word[1] in "aeiou"):
             word_w_repl += "j"
-        elif (first_let == "i") and ((word[1] in "aeou") or (word[1] == "h" and word[2] in "aeo")):
+        elif (first_let == "i") and (
+            (word[1] in "aeou") or (word[1] == "h" and word[2] in "aeo")
+        ):
             word_w_repl += "j"
         elif (first_let == "u") and (word[1] in "aeiouy"):
             word_w_repl += "v"
@@ -166,6 +168,7 @@ def _get_vowel_positions(word: str) -> "list[int]":
         else:
             word_indexer += 1
     return vowel_positions
+
 
 def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> "tuple[int, str]":
     """

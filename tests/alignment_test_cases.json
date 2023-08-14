@@ -59,7 +59,7 @@
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
-            ["{diebus add char}", "6------------------6---"],
+            ["{diebus add char}", "6-----------------6---"],
             ["e-", "f---"],
             ["{ius}", "6------6---"],
             ["ob-", "g--"],
@@ -108,18 +108,16 @@
     {
         "case_name": "Test alignment: overflow text",
         "text_input": "in diebus eius obsessa est",
-        "vol_input": "1---f---df--f-f---f--g-efgfe---g--hg-hgf--ef-gef--ed---4",
+        "vol_input": "1---f---df--f-f---f---g--hg--hg---4",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
             ["di-", "df--"],
             ["e-bus", "f-f---"],
-            ["e-", "f--"],
-            ["ius","g-efgfe---"],
+            ["e-ius", "f---"],
             ["ob-", "g--"],
-            ["ses-", "hg-hgf--"],
-            ["sa", "ef-gef--"],
-            ["","ed---"],
+            ["ses-", "hg--"],
+            ["sa", "hg---"],
             ["est", "--"],
             ["", "4"]
         ]
@@ -127,7 +125,7 @@
     {
         "case_name": "Test alignment: overflow volpiano",
         "text_input": "in diebus eius obsessa est",
-        "vol_input": "1---f---df--f--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---gh---4",
+        "vol_input": "1---f---df--f--f--f---f--efgfe---g--hg-hgf--ef-gef--hj-hj---ed---gh---4",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -139,7 +137,8 @@
             ["ius", "efgfe---"],
             ["ob-", "g--"],
             ["ses-", "hg-hgf--"],
-            ["sa", "ef-gef---"],
+            ["sa", "ef-gef--"],
+            ["", "hj-hj---"],
             ["est", "ed---"],
             ["", "gh---"],
             ["", "4"]
@@ -181,6 +180,64 @@
             ["|", "4---"],
             ["~Ipsum [obsessa est]", "g--hg--hgf--ef--gef--ed---"],
             ["", "4"]
+        ]
+    },
+    {
+        "case_name": "Expected version for dropped words in middle of section",
+        "text_input": "in diebus eius | obsessa est",
+        "vol_input": "1---f---df--f--f---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["|", "4---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: dropped text word in middle of section",
+        "text_input": "in eius | obsessa est",
+        "vol_input": "1---f---df--f--f---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["e-", "df--"],
+            ["ius", "f--"],
+            ["", "f---"],
+            ["", "f--"],
+            ["", "efgfe---"],
+            ["|", "4---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: dropped volpiano word in middle of section",
+        "text_input": "in diebus eius | obsessa est",
+        "vol_input": "1---f---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "f--"],
+            ["e-bus", "efgfe---"],
+            ["e-ius", "--"],
+            ["|", "4---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "3"]
         ]
     }
 ]

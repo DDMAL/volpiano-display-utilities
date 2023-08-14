@@ -114,84 +114,86 @@ class TestCantusTextSyllabification(unittest.TestCase):
         # Bene- {dictus} qui venit {#} no- {#} -ne {#} -omini
         # {cantic- #} {#} {# -ovum} quia mirabilia fecit | salvavit sibi dextera
         # eius et brachium sanctum eius | ~Gloria | ~Ipsum [Canticum]"
-        normal_text = "Sanctus sanctus sanctus"
-        exp_normal_text = [[["Sanc-", "tus"], ["sanc-", "tus"], ["sanc-", "tus"]]]
-        missing_complete_words = "# Sabaoth"
-        exp_missing_complete_words = [[["#"], ["Sa-", "ba-", "oth"]]]
-        missing_partial_words = "plen- # sunt # -li"
-        exp_missing_partial_words = [[["plen-"], ["#"], ["sunt"], ["#"], ["-li"]]]
-        words_with_missing_music = "et {terra gloria} tua"
-        exp_words_with_missing_music = [[["et"]], [["{terra gloria}"]], [["tu-", "a"]]]
-        partial_words_with_missing_music = "Bene- {dictus} qui"
-        exp_partial_words_with_missing_music = [
-            [["Be-", "ne-"]],
-            [["{dictus}"]],
-            [["qui"]],
+        test_cases = [
+            {
+                "case_name": "Normal Text",
+                "test_string": "Sanctus sanctus sanctus",
+                "expected_result": [
+                    [["Sanc-", "tus"], ["sanc-", "tus"], ["sanc-", "tus"]]
+                ],
+            },
+            {
+                "case_name": "Missing Complete Words",
+                "test_string": "# Sabaoth",
+                "expected_result": [[["#"], ["Sa-", "ba-", "oth"]]],
+            },
+            {
+                "case_name": "Missing Partial Words",
+                "test_string": "plen- # sunt # -li",
+                "expected_result": [[["plen-"], ["#"], ["sunt"], ["#"], ["-li"]]],
+            },
+            {
+                "case_name": "Words with Missing Music",
+                "test_string": "et {terra gloria} tua",
+                "expected_result": [[["et"]], [["{terra gloria}"]], [["tu-", "a"]]],
+            },
+            {
+                "case_name": "Partial Words with Missing Music",
+                "test_string": "Bene- {dictus} qui",
+                "expected_result": [[["Be-", "ne-"]], [["{dictus}"]], [["qui"]]],
+            },
+            {
+                "case_name": "Missing Whole Words and Music",
+                "test_string": "venit {#}",
+                "expected_result": [[["ve-", "nit"]], [["{#}"]]],
+            },
+            {
+                "case_name": "Missing Partial Words and Music",
+                "test_string": "no- {#} -ne {#} -omini",
+                "expected_result": [
+                    [["no-"]],
+                    [["{#}"]],
+                    [["-ne"]],
+                    [["{#}"]],
+                    [["-o-", "mi-", "ni"]],
+                ],
+            },
+            {
+                "case_name": "Partial Text with All Music Missing",
+                "test_string": "{cantic- #} {#} {# -ovum}",
+                "expected_result": [[["{cantic- #} {#} {# -ovum}"]]],
+            },
+            {
+                "case_name": "Text with Section Break",
+                "test_string": "quia mirabilia fecit | salvavit sibi dextera eius",
+                "expected_result": [
+                    [["qui-", "a"], ["mi-", "ra-", "bi-", "li-", "a"], ["fe-", "cit"]],
+                    [["|"]],
+                    [
+                        ["sal-", "va-", "vit"],
+                        ["si-", "bi"],
+                        ["dex-", "te-", "ra"],
+                        ["e-", "ius"],
+                    ],
+                ],
+            },
+            {
+                "case_name": "Text with Incipit",
+                "test_string": "et brachium sanctum eius | ~Gloria | ~Ipsum [Canticum]",
+                "expected_result": [
+                    [["et"], ["bra-", "chi-", "um"], ["sanc-", "tum"], ["e-", "ius"]],
+                    [["|"]],
+                    [["~Gloria"]],
+                    [["|"]],
+                    [["~Ipsum [Canticum]"]],
+                ],
+            },
         ]
-        missing_whole_words_and_music = "venit {#}"
-        exp_missing_whole_words_and_music = [[["ve-", "nit"]], [["{#}"]]]
-        missing_partial_words_and_music = "no- {#} -ne {#} -omini"
-        exp_missing_partial_words_and_music = [
-            [["no-"]],
-            [["{#}"]],
-            [["-ne"]],
-            [["{#}"]],
-            [["-o-", "mi-", "ni"]],
-        ]
-        partial_text_with_all_music_missing = "{cantic- #} {#} {# -ovum}"
-        exp_partial_text_with_all_music_missing = [
-            [
-                ["{cantic- #} {#} {# -ovum}"],
-            ]
-        ]
-        text_with_section_break = "quia mirabilia fecit | salvavit sibi dextera eius"
-        exp_text_with_section_break = [
-            [["qui-", "a"], ["mi-", "ra-", "bi-", "li-", "a"], ["fe-", "cit"]],
-            [["|"]],
-            [
-                ["sal-", "va-", "vit"],
-                ["si-", "bi"],
-                ["dex-", "te-", "ra"],
-                ["e-", "ius"],
-            ],
-        ]
-        text_with_incipit = "et brachium sanctum eius | ~Gloria | ~Ipsum [Canticum]"
-        exp_text_with_incipit = [
-            [["et"], ["bra-", "chi-", "um"], ["sanc-", "tum"], ["e-", "ius"]],
-            [["|"]],
-            [["~Gloria"]],
-            [["|"]],
-            [["~Ipsum [Canticum]"]],
-        ]
-        all_test_strings = [
-            normal_text,
-            missing_complete_words,
-            missing_partial_words,
-            words_with_missing_music,
-            partial_words_with_missing_music,
-            missing_whole_words_and_music,
-            missing_partial_words_and_music,
-            partial_text_with_all_music_missing,
-            text_with_section_break,
-            text_with_incipit,
-        ]
-        full_expected_result = [
-            exp_normal_text,
-            exp_missing_complete_words,
-            exp_missing_partial_words,
-            exp_words_with_missing_music,
-            exp_partial_words_with_missing_music,
-            exp_missing_whole_words_and_music,
-            exp_missing_partial_words_and_music,
-            exp_partial_text_with_all_music_missing,
-            exp_text_with_section_break,
-            exp_text_with_incipit,
-        ]
-        for test_case_num in range(10):
-            with self.subTest(test_case_num=test_case_num):
+        for test_case in test_cases:
+            with self.subTest(test_case["case_name"]):
                 self.assertEqual(
-                    syllabify_text(all_test_strings[test_case_num]),
-                    full_expected_result[test_case_num],
+                    syllabify_text(test_case["test_string"]),
+                    test_case["expected_result"],
                 )
 
 
@@ -209,6 +211,9 @@ class TestTextVolpianoAlignment(unittest.TestCase):
             "tests/alignment_test_cases.json", encoding="ascii"
         ) as test_case_json:
             test_cases = json.load(test_case_json)
+        # We have to convert the expected results from a list of lists to a list
+        # of tuples, because the expected results of align_text_and_volpiano are
+        # lists of tuples.
         for test_case in test_cases:
             tupled_case = []
             for list_elem in test_case["expected_result"]:

@@ -44,10 +44,10 @@ def _preprocess_volpiano(volpiano_str: str) -> str:
             # Add barline character
             processed_str += char
             # Add proper spacing after barline
-            num_hyph_ahead = sum(
+            num_hyph_next = sum(
                 1 for _ in takewhile(lambda x: x == "-", volpiano_str[i + 1 :])
             )
-            processed_str += "-" * (3 - num_hyph_ahead)
+            processed_str += "-" * (3 - num_hyph_next)
             continue
         processed_str += char
     # Ensure volpiano string ends with a properly-spaced barline
@@ -70,13 +70,17 @@ def _postprocess_spacing(
 
     comb_text_and_vol [list[tuple[str, str]]]:
         list of tuples of text syllables and volpiano syllables
+
+    returns [list[tuple[str, str]]]: list of tuples of text syllables and
+        volpiano syllables with spacing of missing music sections responsive
+        to associated text length
     """
     comb_text_and_vol_rev_spacing = []
     for text_elem, vol_elem in comb_text_and_vol:
         if vol_elem[0] == "6":
             text_length = len(text_elem)
             if text_length > 10:
-                vol_elem = "6---" + "---" * (text_length // 3) + "6---"
+                vol_elem = "6" + "-" * text_length + "6---"
         comb_text_and_vol_rev_spacing.append((text_elem, vol_elem))
     return comb_text_and_vol_rev_spacing
 
@@ -132,17 +136,23 @@ def _align_section(
             comb_section.append((text_section[0][0], volpiano_section))
         else:
             logging.debug("Text section has more than expected elements. Flattening.")
-            full_text = "".join([syl for word in text_section for syl in word])
+            flattened_section = []
+            for word in text_section:
+                flattened_section.extend(word)
+            full_text = "".join(flattened_section)
             comb_section.append((full_text, volpiano_section))
     # For unsyllabified sections of text, the text section section should have a single
-    # element. If it does, align the complete volpiano sextion to this element. If not
+    # element. If it does, align the complete volpiano section to this element. If not
     # (an error), flatten the text section to a single string and combine.
     elif text_section[0][0].startswith("~") or text_section[0][0].startswith("["):
         if len(text_section) == 0 and len(text_section[0]) == 0:
             comb_section.append((text_section[0][0], volpiano_section))
         else:
             logging.debug("Text section has more than expected elements. Flattening.")
-            full_text = "".join([syl for word in text_section for syl in word])
+            flattened_section = []
+            for word in text_section:
+                flattened_section.extend(word)
+            full_text = "".join(flattened_section)
             comb_section.append((full_text, volpiano_section))
     # Otherwise, align the sections word by word.
     else:
@@ -156,12 +166,14 @@ def _align_section(
     return comb_section
 
 
-def align_text_and_volpiano(chant_text, volpiano_str):
+def align_text_and_volpiano(
+    chant_text: "list[list[list[str]]]", volpiano_str: str
+) -> "list[tuple[str, str]]":
     """
     Aligns syllabified text with volpiano, performing periodic sanity checks
     and accounting for misalignments.
 
-    chant_text [list[list[str]]]: syllabified text
+    chant_text list[list[list[str]]]]: syllabified text
     volpiano_str [str]: volpiano string
 
     returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
