@@ -168,10 +168,7 @@ def _get_vowel_positions(word: str) -> "list[int]":
     # Replace semi-vowels for the purposes of finding vowels.
     word = _replace_semivowels_and_v(word)
     logging.debug("Semivowels, long i's, v's found: %s", word)
-    vowel_positions = []
-    for idx, char in enumerate(word):
-        if char in _VOWELS:
-            vowel_positions.append(idx)
+    vowel_positions = [idx for idx, char in enumerate(word) if char in _VOWELS]
     return vowel_positions
 
 
