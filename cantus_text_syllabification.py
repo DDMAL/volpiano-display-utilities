@@ -147,41 +147,42 @@ def syllabify_text(
         syllabified_section = []
         if text_section == "|" or text_section[0] in "{~[":
             syllabified_section.append([text_section])
+            syllabified_text.append(syllabified_section)
             logging.debug("Text section not syllabified: %s", text_section)
-        else:
-            words = text_section.split(" ")
-            words = list(filter(lambda x: x != "", words))
-            for word in words:
-                # Don't syllabify the missing text symbol ("#")
-                if word == "#":
-                    syllabified_section.append([word])
-                    logging.debug("Word not syllabified: %s", word)
-                # If the word is an exception, syllabify as specified
-                elif word in EXCEPTIONS_DICT:
-                    syllabified_section.append(EXCEPTIONS_DICT[word])
-                    logging.debug(
-                        "Cantus Database syllabification exception found: %s", word
-                    )
-                else:
-                    # Record presence of and remove leading and trailing hyphens
-                    # from words
-                    (
-                        prepared_word,
-                        start_hyphen,
-                        end_hyphen,
-                    ) = _prepare_string_for_syllabification(word)
-                    word_syllable_boundaries = syllabify_word(
-                        prepared_word, return_string=False
-                    )
-                    syllabified_word = split_word_by_syl_bounds(
-                        prepared_word, word_syllable_boundaries
-                    )
-                    # Re-add leading or trailing hyphens from words if necessary
-                    if start_hyphen:
-                        syllabified_word[0] = f"-{syllabified_word[0]}"
-                    if end_hyphen:
-                        syllabified_word[-1] = f"{syllabified_word[-1]}-"
-                    syllabified_section.append(syllabified_word)
+            continue
+        words = text_section.split(" ")
+        words = list(filter(lambda x: x != "", words))
+        for word in words:
+            # Don't syllabify the missing text symbol ("#")
+            if word == "#":
+                syllabified_section.append([word])
+                logging.debug("Word not syllabified: %s", word)
+            # If the word is an exception, syllabify as specified
+            elif word in EXCEPTIONS_DICT:
+                syllabified_section.append(EXCEPTIONS_DICT[word])
+                logging.debug(
+                    "Cantus Database syllabification exception found: %s", word
+                )
+            else:
+                # Record presence of and remove leading and trailing hyphens
+                # from words
+                (
+                    prepared_word,
+                    start_hyphen,
+                    end_hyphen,
+                ) = _prepare_string_for_syllabification(word)
+                word_syllable_boundaries = syllabify_word(
+                    prepared_word, return_string=False
+                )
+                syllabified_word = split_word_by_syl_bounds(
+                    prepared_word, word_syllable_boundaries
+                )
+                # Re-add leading or trailing hyphens from words if necessary
+                if start_hyphen:
+                    syllabified_word[0] = f"-{syllabified_word[0]}"
+                if end_hyphen:
+                    syllabified_word[-1] = f"{syllabified_word[-1]}-"
+                syllabified_section.append(syllabified_word)
         syllabified_text.append(syllabified_section)
     logging.debug("Syllabified text: %s", syllabified_text)
     if flatten_result:

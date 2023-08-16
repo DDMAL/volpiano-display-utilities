@@ -29,13 +29,23 @@ from typing import Union
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
-_CONSONANT_GROUPS = ["ch", "ph", "th", "rh", "gn", "qu", "gu", "nc", "mp", "sc"] + [
+_CONSONANT_GROUPS: list = ["ch", "ph", "th", "rh", "gn", "qu", "gu", "nc", "mp", "sc"] + [
     x[0] + x[1] for x in itertools.product("pbtdcfg", "lr")
 ]
+_CONSONANT_GROUPS = set(_CONSONANT_GROUPS)
 
 # Prefix groups are groups of characters that serve as common prefixes. For details,
 # see README.
-_PREFIX_GROUPS = ["ab", "ob", "ad", "per", "sub", "in", "con"]
+_PREFIX_GROUPS: set = {"ab", "ob", "ad", "per", "sub", "in", "con"}
+
+_VOWELS: set = {"a", "e", "i", "o", "u", "y"}
+_VOWELS_AEOU: set = {"a", "e", "o", "u"}
+_VOWELS_AEIOU: set = {"a", "e", "i", "o", "u"}
+_VOWELS_AEO: set = {"a", "e", "o"}
+_VOWELS_EOU: set = {"e", "o", "u"}
+_VOWELS_IY: set = {"i","y"}
+_VOWELS_IUY: set = {"i","u","y"}
+_QG = {"q", "g"}
 
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
 
@@ -99,13 +109,13 @@ def _replace_semivowels_and_v(word: str) -> str:
     # Handle first character in the word
     first_let = word[0]
     try:
-        if (first_let in "y") and (word[1] in "aeiou"):
+        if (first_let == "y") and (word[1] in _VOWELS_AEIOU):
             word_w_repl += "j"
         elif (first_let == "i") and (
-            (word[1] in "aeou") or (word[1] == "h" and word[2] in "aeo")
+            (word[1] in _VOWELS_AEOU) or (word[1] == "h" and word[2] in _VOWELS_AEO)
         ):
             word_w_repl += "j"
-        elif (first_let == "u") and (word[1] in "aeiouy"):
+        elif (first_let == "u") and (word[1] in _VOWELS):
             word_w_repl += "v"
         else:
             word_w_repl += first_let
@@ -116,21 +126,21 @@ def _replace_semivowels_and_v(word: str) -> str:
     # Handle remaining characters
     while word != "":
         char = word[0]
-        if char not in "iyu" or len(word) == 1:
+        if char not in _VOWELS_IUY or len(word) == 1:
             word_w_repl += char
-        elif char in "iy":
-            if ((word_w_repl[-1] in "aeou") and (word[1] in "aeou")) or (
+        elif char in _VOWELS_IY:
+            if ((word_w_repl[-1] in _VOWELS_AEOU) and (word[1] in _VOWELS_AEOU)) or (
                 (word_w_repl[-2:] not in _CONSONANT_GROUPS)
                 and (word_w_repl[-1] == "h")
-                and (word[1] in "eou")
+                and (word[1] in _VOWELS_EOU)
             ):
                 word_w_repl += "j"
             else:
                 word_w_repl += "i"
         elif char == "u":
-            if word_w_repl[-1] in "qg" and word[1] in "aeiouy":
+            if word_w_repl[-1] in _QG and word[1] in _VOWELS:
                 word_w_repl += "w"
-            elif word_w_repl[-1] in "aeiouy" and word[1] in "aeiouy":
+            elif word_w_repl[-1] in _VOWELS and word[1] in _VOWELS:
                 word_w_repl += "v"
             else:
                 word_w_repl += "u"
@@ -159,14 +169,9 @@ def _get_vowel_positions(word: str) -> "list[int]":
     word = _replace_semivowels_and_v(word)
     logging.debug("Semivowels, long i's, v's found: %s", word)
     vowel_positions = []
-    word_indexer = 0
-    while word_indexer < len(word):
-        char = word[word_indexer]
-        if char in "aeiouy":
-            vowel_positions.append(word_indexer)
-            word_indexer += 1
-        else:
-            word_indexer += 1
+    for idx, char in enumerate(word):
+        if char in _VOWELS:
+            vowel_positions.append(idx)
     return vowel_positions
 
 
@@ -333,8 +338,3 @@ def syllabify_word(word: str, return_string: bool = False) -> Union["list[int]",
     if return_string:
         return "".join(split_word_by_syl_bounds(word, syllable_boundaries))
     return syllable_boundaries
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    print(syllabify_word("ih"))
