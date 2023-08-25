@@ -75,7 +75,7 @@ def split_word_by_syl_bounds(word: str, syl_bounds: "list[int]") -> "list[str]":
 
 def _get_prefixes(word: str) -> str:
     """
-    Returns the profix of a word, if it has one.
+    Returns the prefix of a word, if it has one.
 
     word [str]: word to check for prefix
 
@@ -237,7 +237,8 @@ def _syllabify(word: str) -> "list[int]":
 
     word [str]: word to syllabify
 
-    returns [list[int]]: list of syllables
+    returns [list[int]]: list of indices indicating where
+        in word syllables begin
     """
     logging.debug("Finding syllables: %s", word)
 
