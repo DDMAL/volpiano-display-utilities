@@ -29,10 +29,30 @@ from typing import Union
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
-_CONSONANT_GROUPS: list = ["ch", "ph", "th", "rh", "gn", "qu", "gu", "nc", "mp", "sc"] + [
-    x[0] + x[1] for x in itertools.product("pbtdcfg", "lr")
-]
-_CONSONANT_GROUPS = set(_CONSONANT_GROUPS)
+_CONSONANT_GROUPS: set = {
+    "ch",
+    "ph",
+    "th",
+    "rh",
+    "gn",
+    "qu",
+    "gu",
+    "nc",
+    "mp",
+    "sc",
+    "pl",
+    "pr",
+    "bl",
+    "br",
+    "tr",
+    "dr",
+    "cl",
+    "cr",
+    "fl",
+    "fr",
+    "gl",
+    "gr",
+}
 
 # Prefix groups are groups of characters that serve as common prefixes. For details,
 # see README.
@@ -43,8 +63,8 @@ _VOWELS_AEOU: set = {"a", "e", "o", "u"}
 _VOWELS_AEIOU: set = {"a", "e", "i", "o", "u"}
 _VOWELS_AEO: set = {"a", "e", "o"}
 _VOWELS_EOU: set = {"e", "o", "u"}
-_VOWELS_IY: set = {"i","y"}
-_VOWELS_IUY: set = {"i","u","y"}
+_VOWELS_IY: set = {"i", "y"}
+_VOWELS_IUY: set = {"i", "u", "y"}
 _QG = {"q", "g"}
 
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
