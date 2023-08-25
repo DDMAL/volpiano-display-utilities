@@ -31,7 +31,7 @@ STR_BEGINS_W_HYPHEN_REGEX = re.compile(r"^\-")
 # Matches a string that ends with a hyphen
 STR_ENDS_W_HYPHEN_REGEX = re.compile(r"\-$")
 # Matches pipes and missing music sectioners ("{" and "}")
-TEXT_SECTIONER_REGEX = re.compile(r"(\|)|(\{.*?\})(?!\s*?\{)")
+TEXT_SECTIONER_REGEX = re.compile(r"(\||\{.*?\}(?!\s*?\{))")
 
 
 def _clean_text(text: str) -> str:
@@ -88,10 +88,7 @@ def _split_text_sections(text: str) -> "list[str]":
     text_sections = TEXT_SECTIONER_REGEX.split(text)
     # Remove extra spaces from sections and remove empty sections/None-type sections
     # caused by section split.
-    text_sections = [
-        section.strip() if section is not None else "" for section in text_sections
-    ]
-    text_sections = list(filter(lambda x: x != "", text_sections))
+    text_sections = [section.strip() for section in text_sections if section.strip()]
     return text_sections
 
 
