@@ -24,7 +24,7 @@ The function returns a nested list of strings with the following structure (see 
  - each section list is a list of words (for sections where syllabification is necessary) or a list with one element for the whole section (for sections where syllabification is not necessary)
  - each word is a list of syllable strings (if the word needs to be syllabified)
 
-```{mermaid}
+```mermaid
 flowchart TD
     X["Agnus dei qui {tollis peccata} mundi | Miserere # | ~Agnus"] ---> A(("Section text"))
     A ---> B["Agnus dei qui"]
