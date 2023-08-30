@@ -96,6 +96,7 @@ def syllabify_text(
     text: str,
     clean_text: bool = False,
     flatten_result: bool = False,
+    text_presyllabified: bool = False,
 ) -> Union["list[list[str]]", str]:
     """
     Syllabifies a text string that has been encoded in the style
@@ -109,6 +110,13 @@ def syllabify_text(
     flatten_result [bool]: if True, returns a string of the
         syllabified text (instead of a list of lists) with hyphens separating
         syllables in syllabified substrings. See returns for more details.
+    text_presyllabified [bool]: if True, assumes that an already syllabified
+        text string has been passed.  This is useful for cases
+        where a CantusDB user has edited the syllabification of a chant text that
+        then needs to be aligned with a melody. Already syllabified chant texts
+        stored in CantusDB are strings with syllable breaks indicated by hyphens ("-").
+        This function find a syllable split if and only if a hyphen is
+        present (ie. no additional syllabification is performed).
 
     returns [list[list[list[str]]] or str]: by default, a nested list of strings.
     The return value is a list of text sections, each containing a list of "words"
@@ -168,12 +176,20 @@ def syllabify_text(
                     start_hyphen,
                     end_hyphen,
                 ) = _prepare_string_for_syllabification(word)
-                word_syllable_boundaries = syllabify_word(
-                    prepared_word, return_string=False
-                )
-                syllabified_word = split_word_by_syl_bounds(
-                    prepared_word, word_syllable_boundaries
-                )
+                if text_presyllabified:
+                    syls = prepared_word.split("-")
+                    syllabified_word = [
+                        f"{syl}-" if i != len(syls) - 1 else syl
+                        for i, syl in enumerate(syls)
+                    ]
+                    logging.debug("Presyllabified word: %s", word)
+                else:
+                    word_syllable_boundaries = syllabify_word(
+                        prepared_word, return_string=False
+                    )
+                    syllabified_word = split_word_by_syl_bounds(
+                        prepared_word, word_syllable_boundaries
+                    )
                 # Re-add leading or trailing hyphens from words if necessary
                 if start_hyphen:
                     syllabified_word[0] = f"-{syllabified_word[0]}"

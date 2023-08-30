@@ -53,6 +53,13 @@ Argument `flatten_result` modifies the function return value.
 'Ag-nus de-i qui {tollis peccata} mun-di | Mi-se-re-re # | ~Agnus'
 ```
 
+Cantus Database allows users to edit the syllabification of a chant text created by the automatic syllabification tool in cases where the automatic syllabification is incorrect, where some misalignment between text and melody exists in the manuscript (eg. a word with two syllables has only one pitch in the manuscript), or any other case where a syllabification of the text different than the default syllabification is preferred. These are stored as strings with syllable boundaries marked by hyphens ("-"). Argument `text_presyllabified` (default = False) allows presyllabified texts to be passed in preparation for alignment with a melody. 
+
+```python
+>>> syllabify_text("Ky-ri-e e-le-i-son | Chri-ste e-lei-son", text_presyllabified = True)
+'[[["Ky-","ri-","e"], ["e-","le-","i-","son"]], [["|"]], [["Chri-","ste"], ["e-","lei-","son"]]]'
+```
+
 Aligning chant texts with melodies requires most words in the chant to be syllabified; however, there are a number of cases in which subsets of chant texts are not syllabified: 
  1. Chant text is missing. Missing chant text is encoded with "#" and is aligned with volpiano but not syllabified.
  2. Music is missing. Text associated with missing music is enclosed within curly braces ("{" and "}"). It is aligned with a section of blank staff but is not syllabified.
