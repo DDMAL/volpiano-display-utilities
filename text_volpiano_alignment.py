@@ -167,14 +167,14 @@ def _align_section(
 
 
 def align_text_and_volpiano(
-    chant_text: str, volpiano_str: str
+    chant_text: str, volpiano: str
 ) -> "list[tuple[str, str]]":
     """
     Aligns syllabified text with volpiano, performing periodic sanity checks
     and accounting for misalignments.
 
-    chant_text str: chant text string
-    volpiano_str [str]: volpiano string
+    chant_text [str]: the text of a chant
+    volpiano [str]: the volpiano for a chant
 
     returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
         as (text_str, volpiano_str)
@@ -183,11 +183,11 @@ def align_text_and_volpiano(
         chant_text, clean_text=False, flatten_result=False
     )
     # Performs some validation on the passed volpiano string
-    volpiano_str = _preprocess_volpiano(volpiano_str)
+    volpiano = _preprocess_volpiano(volpiano)
     # Section volpiano to match text sections returned by syllabify_text
     # Split at clefs, barlines, and missing music markers, removing empty
     # sections created by the split.
-    volpiano_sections = re.split(r"([134]-*|6-{6}6-{3})", volpiano_str)
+    volpiano_sections = re.split(r"([134]-*|6-{6}6-{3})", volpiano)
     volpiano_sections = list(filter(lambda x: x != "", volpiano_sections))
     logging.debug("Volpiano sections: %s", volpiano_sections)
     if len(volpiano_sections) == len(syllabified_text) + 2:
