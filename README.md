@@ -24,7 +24,7 @@ The function returns a nested list of strings with the following structure (see 
  - each section list is a list of words (for sections where syllabification is necessary) or a list with one element for the whole section (for sections where syllabification is not necessary)
  - each word is a list of syllable strings (if the word needs to be syllabified)
 
-```{mermaid}
+```mermaid
 flowchart TD
     X["Agnus dei qui {tollis peccata} mundi | Miserere # | ~Agnus"] ---> A(("Section text"))
     A ---> B["Agnus dei qui"]
@@ -51,6 +51,13 @@ Argument `flatten_result` modifies the function return value.
 ```python
 >>> syllabify_text("Agnus dei qui {tollis peccata} mundi | Miserere # | ~Agnus", flatten_result = True)
 'Ag-nus de-i qui {tollis peccata} mun-di | Mi-se-re-re # | ~Agnus'
+```
+
+Cantus Database allows users to edit the syllabification of a chant text created by the automatic syllabification tool in cases where the automatic syllabification is incorrect, where some misalignment between text and melody exists in the manuscript (eg. a word with two syllables has only one pitch in the manuscript), or any other case where a syllabification of the text different than the default syllabification is preferred. These are stored as strings with syllable boundaries marked by hyphens ("-"). Argument `text_presyllabified` (default = False) allows presyllabified texts to be passed in preparation for alignment with a melody. 
+
+```python
+>>> syllabify_text("Ky-ri-e e-le-i-son | Chri-ste e-lei-son", text_presyllabified = True)
+'[[["Ky-","ri-","e"], ["e-","le-","i-","son"]], [["|"]], [["Chri-","ste"], ["e-","lei-","son"]]]'
 ```
 
 Aligning chant texts with melodies requires most words in the chant to be syllabified; however, there are a number of cases in which subsets of chant texts are not syllabified: 

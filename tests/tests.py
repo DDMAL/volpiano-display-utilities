@@ -195,6 +195,48 @@ class TestCantusTextSyllabification(unittest.TestCase):
                     syllabify_text(test_case["test_string"]),
                     test_case["expected_result"],
                 )
+        # Test presyllabified text
+        presyllabified_text = (
+            # Test case where a syllable break has been added
+            # to where it might "normally" occur.
+            "Ma-g-ni-fi-cat a-ni-ma me-a do-mi-nu-m | et "
+            # Test missing music case
+            "ex-ul-ta-vit {spi-ri-tus meus} in de-o | "
+            # Test incipit case
+            "{sa-lu-ta-ri} me-o | ~Quia [re-spex-it] | "
+            # Test missing words and missing words + music case
+            "# hu-mi-li- # # -lae su- {#} "
+            # Test case where we might expect a syllable break, but
+            # user has removed syllable break.
+            "| ecce enim ex hoc be-a-tam"
+        )
+        expected_result = [
+            [
+                ["Ma-", "g-", "ni-", "fi-", "cat"],
+                ["a-", "ni-", "ma"],
+                ["me-", "a"],
+                ["do-", "mi-", "nu-", "m"],
+            ],
+            [["|"]],
+            [["et"], ["ex-", "ul-", "ta-", "vit"]],
+            [["{spi-ri-tus meus}"]],
+            [["in"], ["de-", "o"]],
+            [["|"]],
+            [["{sa-lu-ta-ri}"]],
+            [["me-", "o"]],
+            [["|"]],
+            [["~Quia [re-spex-it]"]],
+            [["|"]],
+            [["#"], ["hu-", "mi-", "li-"], ["#"], ["#"], ["-lae"], ["su-"]],
+            [["{#}"]],
+            [["|"]],
+            [["ecce"], ["enim"], ["ex"], ["hoc"], ["be-", "a-", "tam"]],
+        ]
+        with self.subTest("Presyllabified Text"):
+            self.assertEqual(
+                syllabify_text(presyllabified_text, text_presyllabified=True),
+                expected_result,
+            )
 
 
 class TestTextVolpianoAlignment(unittest.TestCase):

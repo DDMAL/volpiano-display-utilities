@@ -167,7 +167,8 @@ def _align_section(
 
 
 def align_text_and_volpiano(
-    chant_text: str, volpiano: str
+    chant_text: str, volpiano: str,
+    text_presyllabified: bool = False,
 ) -> "list[tuple[str, str]]":
     """
     Aligns syllabified text with volpiano, performing periodic sanity checks
@@ -175,12 +176,15 @@ def align_text_and_volpiano(
 
     chant_text [str]: the text of a chant
     volpiano [str]: the volpiano for a chant
+    text_presyllabified [bool]: whether the text is already syllabified. Passed
+        to syllabify_text (see that functions documentation for more details). Defaults 
+        to False.
 
     returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
         as (text_str, volpiano_str)
     """
     syllabified_text = syllabify_text(
-        chant_text, clean_text=False, flatten_result=False
+        chant_text, clean_text=False, flatten_result=False, text_presyllabified=text_presyllabified
     )
     # Performs some validation on the passed volpiano string
     volpiano = _preprocess_volpiano(volpiano)
