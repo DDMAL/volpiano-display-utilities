@@ -115,7 +115,7 @@ def syllabify_text(
         where a CantusDB user has edited the syllabification of a chant text that
         then needs to be aligned with a melody. Already syllabified chant texts
         stored in CantusDB are strings with syllable breaks indicated by hyphens ("-").
-        This function find a syllable split if and only if a hyphen is
+        This function finds a syllable split if and only if a hyphen is
         present (ie. no additional syllabification is performed).
 
     returns [list[list[list[str]]] or str]: by default, a nested list of strings.

@@ -198,7 +198,7 @@ class TestCantusTextSyllabification(unittest.TestCase):
         # Test presyllabified text
         presyllabified_text = (
             # Test case where a syllable break has been added
-            # to where it might "normalle" occur.
+            # to where it might "normally" occur.
             "Ma-g-ni-fi-cat a-ni-ma me-a do-mi-nu-m | et "
             # Test missing music case
             "ex-ul-ta-vit {spi-ri-tus meus} in de-o | "
