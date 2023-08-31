@@ -77,6 +77,15 @@ Text and volpiano are first aligned section by section and then word by word in 
 - *Section has more text words than volpiano words*: display "extra" words at end of section and add blank staff space ("-") in volpiano for spacing
 
 The alignment algorithm also adapts the size of missing music sections in the volpiano to the amount of text associated with the missing music. Sections of missing music are always encoded "6------6" in volpiano, regardless of how long the missing section is. For the purposes of browser display, the module may add additional space (ie. add hyphens between the "6"s) to this section to account for text. 
+
+The `align_text_and_volpiano` function accepts a chant's text and volpiano-encoded melody as strings and returns the aligned text and melody. The function returns a list of 2-tuples of strings of the form `(text_string, volpiano_string)`.
+
+```python
+>>> from text_volpiano_alignment import align_text_and_volpiano
+>>> align_text_and_volpiano("Agnus dei qui {tollis peccata} mundi", "1---g--g---gh--h---h---6------6---g--h---3")
+'[("", "1---"), ("A-", "g--"), ("gnus", "g---"), ("de-", "gh--"), ("i", "h---"), ("qui", "h---"), ("{tollis peccata}", "6----------------6---"), ("mun-", "g--"), ("di", "h---"), ("", "3")]'
+```
+
 ### Word Syllabification
 
 `syllabify_word` syllabifies individual latin words according to linguistic rules. `syllabify_word` can either return a list of syllable boundaries or a string hyphenated at syllable boundaries. Strings passed to `syllabify_word` must contain only ASCII alphabetic characters; strings with other characters will raise a `ValueError`. 
