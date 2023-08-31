@@ -101,8 +101,12 @@ def _align_word(text_word: "list[str]", volpiano_word: str) -> "list[tuple[str, 
     # syllables in the text than in the volpiano.
     if len(text_word) > len(vol_syls):
         squashed_txt_word = text_word[: len(vol_syls) - 1]
-        squashed_txt_word.append("".join(text_word[len(vol_syls) - 1 :]))
+        squashed_final_syl = "".join(text_word[len(vol_syls) - 1 :])
+        squashed_txt_word.append(squashed_final_syl)
         text_word = squashed_txt_word
+        # Add spacing to volpiano to account for squashing additional
+        # text syllables together.
+        vol_syls[-1] += "-" * (len(squashed_final_syl) - len(vol_syls[-1]) + 1)
     # Pad text syllables with empty strings if more syllables in the
     # volpiano than in the text.
     comb_wrd = list(zip_longest(text_word, vol_syls, fillvalue=""))
