@@ -85,12 +85,12 @@ def _postprocess_spacing(
     return comb_text_and_vol_rev_spacing
 
 
-def _align_word(text_word: "list[str]", volpiano_word: str) -> "list[tuple[str, str]]":
+def _align_word(text_syls: "list[str]", volpiano_word: str) -> "list[tuple[str, str]]":
     """
     Align a word of text and volpiano, padding in case
     either text or volpiano is longer or shorter for that word.
 
-    text_word [list[str]]: list of syllables in the word
+    text_syls [list[str]]: list of syllables in the word
     volpiano_word [str]: volpiano string for the word
 
     returns [list[tuple[str, str]]]: list of tuples of text syllables and
@@ -99,18 +99,20 @@ def _align_word(text_word: "list[str]", volpiano_word: str) -> "list[tuple[str, 
     vol_syls = re.findall(r".*?-{2,3}", volpiano_word)
     # Squash final syllables of a word together if there are more
     # syllables in the text than in the volpiano.
-    if len(text_word) > len(vol_syls):
-        txt_word_wo_overhang = text_word[: len(vol_syls) - 1]
-        overhanging_txt_syls = "".join(text_word[len(vol_syls) - 1 :])
-        txt_word_wo_overhang.append(overhanging_text_syls)
-        text_word = txt_word_wo_overhang
+    if len(text_syls) > len(vol_syls):
+        txt_syls_wo_overhang, txt_overhanging_syls = (
+            text_syls[: len(vol_syls) - 1],
+            text_syls[len(vol_syls) - 1 :],
+        )
+        txt_joined_overhanging_syls = "".join(txt_overhanging_syls)
+        text_syls = txt_syls_wo_overhang + [txt_joined_overhanging_syls]
         # Add spacing to volpiano to account for combining the
         # overhanging text syllables together into the final
         # syllable.
-        vol_syls[-1] += "-" * (len(overhanging_txt_syls) - len(vol_syls[-1]) + 1)
+        vol_syls[-1] += "-" * (len(txt_joined_overhanging_syls) - len(vol_syls[-1]) + 1)
     # Pad text syllables with empty strings if more syllables in the
     # volpiano than in the text.
-    comb_wrd = list(zip_longest(text_word, vol_syls, fillvalue=""))
+    comb_wrd = list(zip_longest(text_syls, vol_syls, fillvalue=""))
     return comb_wrd
 
 
