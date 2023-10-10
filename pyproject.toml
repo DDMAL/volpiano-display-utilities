@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "volpiano display utilities"
+name = "volpiano-display-utilities"
 version = "1.0.0"
 description = "Provides a set of tools for the syllabification of latin chant texts and the alignment of chant texts with Volpiano-encoded melodies according to the conventionss of the Cantus Database."
 authors = ["Your Name <you@example.com>"]
