@@ -14,7 +14,7 @@ import re
 import logging
 from typing import Union, Tuple, List
 
-from latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
+from .latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
 
 EXCEPTIONS_DICT = {
     "euouae": ["e-", "u-", "o-", "u-", "a-", "e"],

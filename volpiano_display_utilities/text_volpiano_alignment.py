@@ -10,7 +10,7 @@ import re
 import logging
 from itertools import zip_longest, takewhile
 from typing import List, Tuple
-from cantus_text_syllabification import syllabify_text
+from .cantus_text_syllabification import syllabify_text
 
 # A string containing all valid volpiano characters in Cantus
 # Database. Used to check for invalid characters.
