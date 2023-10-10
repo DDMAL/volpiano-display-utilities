@@ -5,15 +5,18 @@ import unittest
 import json
 import csv
 
-from latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
-from cantus_text_syllabification import (
+from volpiano_display_utilities.latin_word_syllabification import (
+    syllabify_word,
+    split_word_by_syl_bounds,
+)
+from volpiano_display_utilities.cantus_text_syllabification import (
     _clean_text,
     _prepare_string_for_syllabification,
     _split_text_sections,
     syllabify_text,
     stringify_syllabified_text,
 )
-from text_volpiano_alignment import align_text_and_volpiano
+from volpiano_display_utilities.text_volpiano_alignment import align_text_and_volpiano
 
 
 class TestWordSyllabification(unittest.TestCase):
