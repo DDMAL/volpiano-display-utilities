@@ -7,6 +7,10 @@ The respository consists of three main utilities:
 2. A tool (`latin_word_syllabification.syllabify_word`) that splits latin words into syllables based on linguistic rules. This tool could theoretically be used to syllabify latin words from any latin text, whether or not it is transcribed according to Cantus Database specifications. 
 3. A tool (`text_volpiano_alignment.align_text_and_volpiano`) that aligns a chant's text and volpiano together for display in the browser. The tool includes basic handling of misalignments due to encoding errors. 
 
+## Requirements
+
+The module requires python >= 3.8.
+
 ## Text Syllabification
 
 `syllabify_text` parses a chant text encoded to Cantus Database specifications for display with a melody. A brief overview of Cantus Database encoding conventions can be found below or at www.cantusdatabase.org/documents. 
@@ -191,7 +195,7 @@ This utility includes a suite of tests that can be run using python's `unittest`
 Run all tests from the main repository directory with 
 
 ```python
->>> python3 -m unittest test.tests
+>>> python3 -m unittest tests.tests
 ```
 
 For ease, certain test cases are stored in other files:
