@@ -9,6 +9,7 @@ Use align_text_and_volpiano to align the text and melody strings of a chant.
 import re
 import logging
 from itertools import zip_longest, takewhile
+from typing import List, Tuple
 from cantus_text_syllabification import syllabify_text
 
 # A string containing all valid volpiano characters in Cantus
@@ -58,8 +59,8 @@ def _preprocess_volpiano(volpiano_str: str) -> str:
 
 
 def _postprocess_spacing(
-    comb_text_and_vol: "list[tuple[str, str]]",
-) -> "list[tuple[str, str]]":
+    comb_text_and_vol: List[Tuple[str, str]],
+) -> List[Tuple[str, str]]:
     """
     Handle some special spacing requirements for optimal display
     of volpiano with chant text.
@@ -85,7 +86,7 @@ def _postprocess_spacing(
     return comb_text_and_vol_rev_spacing
 
 
-def _align_word(text_syls: "list[str]", volpiano_word: str) -> "list[tuple[str, str]]":
+def _align_word(text_syls: List[str], volpiano_word: str) -> List[Tuple[str, str]]:
     """
     Align a word of text and volpiano, padding in case
     either text or volpiano is longer or shorter for that word.
@@ -117,8 +118,8 @@ def _align_word(text_syls: "list[str]", volpiano_word: str) -> "list[tuple[str, 
 
 
 def _align_section(
-    text_section: "list[list[str]]", volpiano_section: str
-) -> "list[tuple[str, str]]":
+    text_section: List[List[str]], volpiano_section: str
+) -> List[Tuple[str, str]]:
     """
     Aligns a section of text and volpiano, padding in case
     either text or volpiano is longer or shorter for that section.
@@ -174,9 +175,10 @@ def _align_section(
 
 
 def align_text_and_volpiano(
-    chant_text: str, volpiano: str,
+    chant_text: str,
+    volpiano: str,
     text_presyllabified: bool = False,
-) -> "list[tuple[str, str]]":
+) -> List[Tuple[str, str]]:
     """
     Aligns syllabified text with volpiano, performing periodic sanity checks
     and accounting for misalignments.
@@ -184,14 +186,17 @@ def align_text_and_volpiano(
     chant_text [str]: the text of a chant
     volpiano [str]: the volpiano for a chant
     text_presyllabified [bool]: whether the text is already syllabified. Passed
-        to syllabify_text (see that functions documentation for more details). Defaults 
+        to syllabify_text (see that functions documentation for more details). Defaults
         to False.
 
     returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
         as (text_str, volpiano_str)
     """
     syllabified_text = syllabify_text(
-        chant_text, clean_text=False, flatten_result=False, text_presyllabified=text_presyllabified
+        chant_text,
+        clean_text=False,
+        flatten_result=False,
+        text_presyllabified=text_presyllabified,
     )
     # Performs some validation on the passed volpiano string
     volpiano = _preprocess_volpiano(volpiano)

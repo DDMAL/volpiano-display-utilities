@@ -22,10 +22,9 @@ for more details.
 Logs at level = DEBUG.
 """
 
-import itertools
 import logging
 import re
-from typing import Union
+from typing import Union, Tuple, List
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
@@ -70,7 +69,7 @@ _QG = {"q", "g"}
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
 
 
-def split_word_by_syl_bounds(word: str, syl_bounds: "list[int]") -> "list[str]":
+def split_word_by_syl_bounds(word: str, syl_bounds: List[int]) -> List[str]:
     """
     Splits a word into syllables based on syllable boundaries.
 
@@ -168,7 +167,7 @@ def _replace_semivowels_and_v(word: str) -> str:
     return word_w_repl
 
 
-def _get_vowel_positions(word: str) -> "list[int]":
+def _get_vowel_positions(word: str) -> List[int]:
     """
     Gets the positions of vowels in a word.
 
@@ -192,7 +191,7 @@ def _get_vowel_positions(word: str) -> "list[int]":
     return vowel_positions
 
 
-def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> "tuple[int, str]":
+def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
     """
     Find the adjustment required to a syllable boundary between
     two vowel groups based on the letters between them.
@@ -250,7 +249,7 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> "tuple[int, str]":
     return syl_bound, split_case
 
 
-def _syllabify(word: str) -> "list[int]":
+def _syllabify(word: str) -> List[int]:
     """
     Finds indices of the syllable boundaries of a word.
     See README for details on syllabification rules.
@@ -262,7 +261,7 @@ def _syllabify(word: str) -> "list[int]":
     """
     logging.debug("Finding syllables: %s", word)
 
-    syllable_boundaries = []
+    syllable_boundaries: List[int] = []
 
     if len(word) <= 1:
         logging.debug("### Final word syllabification: %s", word)
@@ -334,7 +333,7 @@ def _syllabify(word: str) -> "list[int]":
     return syllable_boundaries
 
 
-def syllabify_word(word: str, return_string: bool = False) -> Union["list[int]", str]:
+def syllabify_word(word: str, return_string: bool = False) -> Union[List[int], str]:
     """
     See README for details on syllabification rules.
 
