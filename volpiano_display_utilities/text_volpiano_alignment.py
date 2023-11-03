@@ -53,7 +53,12 @@ def _preprocess_volpiano(volpiano_str: str) -> str:
         processed_str += char
     # Ensure volpiano string ends with a properly-spaced barline
     if processed_str[-4:] not in ["---3", "---4"]:
-        processed_str = processed_str.rstrip("-") + "---3"
+        last_char = processed_str[-1]
+        if last_char not in "34":
+            last_char = "3"
+        processed_str = (
+            processed_str.rstrip("3").rstrip("4").rstrip("-") + "---" + last_char
+        )
     logging.debug("Preprocessed volpiano string: %s", processed_str)
     return processed_str
 
