@@ -90,6 +90,11 @@ The `align_text_and_volpiano` function accepts a chant's text and volpiano-encod
 '[("", "1---"), ("A-", "g--"), ("gnus", "g---"), ("de-", "gh--"), ("i", "h---"), ("qui", "h---"), ("{tollis peccata}", "6----------------6---"), ("mun-", "g--"), ("di", "h---"), ("", "3")]'
 ```
 
+The `align_text_and_volpiano` function also takes the following optional arguments:
+  - `text_presyllabified`: A boolean indicating whether the text passed to the function has already been syllabified (with hyphens marking syllable boundaries). Defaults to `False`.
+  - `clean_text`: A boolean passed to the text syllabification tool indicating whether text should be stripped of invalid characters before syllabification. Defaults to `False`.
+
+
 ### Word Syllabification
 
 `syllabify_word` syllabifies individual latin words according to linguistic rules. `syllabify_word` can either return a list of syllable boundaries or a string hyphenated at syllable boundaries. Strings passed to `syllabify_word` must contain only ASCII alphabetic characters; strings with other characters will raise a `ValueError`. 
