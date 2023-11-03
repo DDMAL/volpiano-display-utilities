@@ -40,9 +40,22 @@
         ]
     },
     {
-        "case_name": "Test alignment: missing final bar",
+        "case_name": "Test alignment: missing final barline",
         "text_input": "in diebus",
         "vol_input": "1---f---df--f--f--",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: improper spacing with final barline",
+        "text_input": "in diebus",
+        "vol_input": "1---f---df--f--f--3",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
