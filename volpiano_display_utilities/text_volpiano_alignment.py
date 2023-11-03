@@ -178,6 +178,7 @@ def align_text_and_volpiano(
     chant_text: str,
     volpiano: str,
     text_presyllabified: bool = False,
+    clean_text: bool = False,
 ) -> List[Tuple[str, str]]:
     """
     Aligns syllabified text with volpiano, performing periodic sanity checks
@@ -188,13 +189,16 @@ def align_text_and_volpiano(
     text_presyllabified [bool]: whether the text is already syllabified. Passed
         to syllabify_text (see that functions documentation for more details). Defaults
         to False.
+    clean_text [bool]: whether to clean the text before syllabifying. Passed to
+        syllabify_text (see that functions documentation for more details). Defaults
+        to False.
 
     returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
         as (text_str, volpiano_str)
     """
     syllabified_text = syllabify_text(
         chant_text,
-        clean_text=False,
+        clean_text=clean_text,
         flatten_result=False,
         text_presyllabified=text_presyllabified,
     )
