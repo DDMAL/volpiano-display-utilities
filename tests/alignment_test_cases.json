@@ -83,6 +83,29 @@
         ]
     },
     {
+        "case_name": "Test alignment: missing music #2 (CDB Chant 229133)",
+        "text_input": "{Domini est terra et} plenitudo e {ius orbis terrarum et uni} versi qui habitant {in eo}",
+        "vol_input": "1---6------67---ghg--h--hkhg--hf-gh-kjh-jkjh---ghkhgh---6------67---kjhg--hghg-gF--gf---fd---efe--f--fh---6------67---4",
+        "expected_result": [
+            ["", "1---"],
+            ["{Domini est terra et}", "6---------------------67---"],
+            ["ple-", "ghg--"],
+            ["ni-", "h--"],
+            ["tu-","hkhg--"],
+            ["do","hf-gh-kjh-jkjh---"],
+            ["e", "ghkhgh---"],
+            ["{ius orbis terrarum et uni}", "6---------------------------67---"],
+            ["ver-", "kjhg--"],
+            ["si", "hghg-gF--"],
+            ["qui", "gf---"],
+            ["ha-", "fd---"],
+            ["bi-", "efe--"],
+            ["tant", "f--fh---"],
+            ["{in eo}", "6------67---"],
+            ["", "4"]
+        ]
+    },
+    {
         "case_name": "Test alignment: missing words",
         "text_input": "in # eius obsess- #",
         "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf---ef--gef--ed---3",
