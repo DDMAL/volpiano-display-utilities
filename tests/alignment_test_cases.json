@@ -256,7 +256,7 @@
     {
         "case_name": "Test alignment: improper clef",
         "text_input": "in diebus eius obsessa est",
-        "vol_input": "-j---1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "vol_input": "-j---1--f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
