@@ -222,7 +222,7 @@ def align_text_and_volpiano(
     # Section volpiano to match text sections returned by syllabify_text
     # Split at clefs, barlines, and missing music markers, removing empty
     # sections created by the split.
-    volpiano_sections = re.split(r"([134]-*|6-{6}6-{3})", volpiano)
+    volpiano_sections = re.split(r"([134]-*|6-*6-*)", volpiano)
     volpiano_sections = list(filter(lambda x: x != "", volpiano_sections))
     logging.debug("Volpiano sections: %s", volpiano_sections)
     if len(volpiano_sections) == len(syllabified_text) + 2:
