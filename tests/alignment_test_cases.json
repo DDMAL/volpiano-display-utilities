@@ -83,7 +83,7 @@
         ]
     },
     {
-        "case_name": "Test alignment: missing music #2 (CDB Chant 229133)",
+        "case_name": "Test alignment: missing music followed by line breaks (CDB Chant 229133)",
         "text_input": "{Domini est terra et} plenitudo e {ius orbis terrarum et uni} versi qui habitant {in eo}",
         "vol_input": "1---6------67---ghg--h--hkhg--hf-gh-kjh-jkjh---ghkhgh---6------67---kjhg--hghg-gF--gf---fd---efe--f--fh---6------67---4",
         "expected_result": [
