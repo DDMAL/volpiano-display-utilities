@@ -19,7 +19,7 @@ def create_html_string(cases):
     for case_name, chant in cases:
         chant_html = f'<div style="display:flex"><h4>{case_name}</h4>'
         for txt, vol in chant:
-            chant_html += f"""<span style="float: left"><div style="font-family: volpiano; font-size: 36px">{vol}</div>
+            chant_html += f"""<span style="float: left"><div style="font-family: volpiano; font-size: 36px; white-space: nowrap">{vol}</div>
                         <div class="mt-2" style="font-size: 12px; "><pre>{txt}</pre></div>
                         </span>
                         """
