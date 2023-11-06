@@ -16,11 +16,17 @@ from .cantus_text_syllabification import syllabify_text
 # Database. Used to check for invalid characters.
 VALID_VOLPIANO_CHARS = "-19abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]"
 
+# Matches any material before the clef, the clef itself, and
+# any following spacing in a volpiano string.
+STARTING_MATERIAL = re.compile(r".*1-*")
+
 
 def _preprocess_volpiano(volpiano_str: str) -> str:
     """
     Prepares volpiano string for alignment with text:
     - Checks for any invalid characters
+    - Ensure volpiano begins with a clef followed by three hyphens. Assume
+        that anything entered before a clef should be removed.
     - Ensures proper spacing around barlines ("3" and "4") and missing
         music indicators ("6")
     - Ensures volpiano string has an ending barline ("3" or "4")
@@ -30,6 +36,9 @@ def _preprocess_volpiano(volpiano_str: str) -> str:
     returns [str]: preprocessed volpiano string
     """
     processed_str = ""
+    # Remove existing clefs
+    volpiano_str = STARTING_MATERIAL.sub("", volpiano_str)
+    volpiano_str = "1---" + volpiano_str
     volpiano_str_len = len(volpiano_str)
     for i, char in enumerate(volpiano_str):
         # Check if char is valid
