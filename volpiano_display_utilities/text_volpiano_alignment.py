@@ -20,6 +20,15 @@ VALID_VOLPIANO_CHARS = "-19abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]"
 # any following spacing in a volpiano string.
 STARTING_MATERIAL = re.compile(r".*1-*")
 
+# Split sections of volpiano on clefs, barline markers, and missing
+# music indicators. Includes spacing (hyphens) and section markers (7's)
+# in the split, if present.
+VOLPIANO_SECTIONING_REGEX = re.compile(r"([134][\-7]*|6[\-7]*6[\-7]*)")
+
+VOLPIANO_WORD_REGEX = re.compile(r".*?---")
+
+VOLPIANO_SYLLABLE_REGEX = re.compile(r".*?-{2,3}")
+
 
 def _preprocess_volpiano(raw_volpiano_str: str) -> str:
     """
@@ -30,6 +39,8 @@ def _preprocess_volpiano(raw_volpiano_str: str) -> str:
     - Ensures proper spacing around barlines ("3" and "4") and missing
         music indicators ("6")
     - Ensures volpiano string has an ending barline ("3" or "4")
+    - Finds line and page breaks and removes them from the volpiano string
+        (they are added back in postprocessing)
 
     raw_volpiano_str [str]: unprocessed volpiano string
 
@@ -40,35 +51,34 @@ def _preprocess_volpiano(raw_volpiano_str: str) -> str:
     # clef. Re-add a "clean" starting clef.
     vol_clef_rmvd = STARTING_MATERIAL.sub("", raw_volpiano_str)
     vol_clef_added = "1---" + vol_clef_rmvd
-    vol_str_len = len(vol_clef_added)
-    for i, char in enumerate(vol_clef_added):
+    # Remove existing ending bar line and add a "clean" ending barline.
+    last_char = vol_clef_added[-1]
+    if last_char not in "34":
+        last_char = "3"
+    vol_clef_fin_bar_added = (
+        vol_clef_added.rstrip("3").rstrip("4").rstrip("-") + "---" + last_char
+    )
+    vol_str_len = len(vol_clef_fin_bar_added)
+    for i, char in enumerate(vol_clef_fin_bar_added):
         # Check if char is valid
         if char not in VALID_VOLPIANO_CHARS:
             logging.debug("Removed invalid character (%s) in volpiano string.", char)
             continue
         # Check if char is a barline or missing music indicator and ensure
         # proper spacing
-        if (char in "346") and (i != vol_str_len - 1):
-            # Add proper spacing before barline
-            while processed_str[-3:] != "---":
-                processed_str += "-"
-            # Add barline character
-            processed_str += char
-            # Add proper spacing after barline
-            num_hyph_next = sum(
-                1 for _ in takewhile(lambda x: x == "-", vol_clef_added[i + 1 :])
-            )
-            processed_str += "-" * (3 - num_hyph_next)
-            continue
+        # if (char in "346") and (i != vol_str_len - 1):
+        #     # Add proper spacing before barline
+        #     while processed_str[-3:] != "---":
+        #         processed_str += "-"
+        #     # Add barline character
+        #     processed_str += char
+        #     # Add proper spacing after barline
+        #     num_hyph_next = sum(
+        #         1 for _ in takewhile(lambda x: x == "-", vol_clef_fin_bar_added[i + 1 :])
+        #     )
+        #     processed_str += "-" * (3 - num_hyph_next)
+        #     continue
         processed_str += char
-    # Ensure volpiano string ends with a properly-spaced barline
-    if processed_str[-4:] not in ["---3", "---4"]:
-        last_char = processed_str[-1]
-        if last_char not in "34":
-            last_char = "3"
-        processed_str = (
-            processed_str.rstrip("3").rstrip("4").rstrip("-") + "---" + last_char
-        )
     logging.debug("Preprocessed volpiano string: %s", processed_str)
     return processed_str
 
@@ -83,6 +93,7 @@ def _postprocess_spacing(
     Ensures that:
      - the length of missing music sections responds to the length of
         the text associated with the section
+     - internal barlines have appropriate spacing
 
     comb_text_and_vol [list[tuple[str, str]]]:
         list of tuples of text syllables and volpiano syllables
@@ -92,12 +103,19 @@ def _postprocess_spacing(
         to associated text length
     """
     comb_text_and_vol_rev_spacing = []
-    for text_elem, vol_elem in comb_text_and_vol:
+    for text_elem, vol_elem in comb_text_and_vol[:-1]:
         if vol_elem[0] == "6":
             text_length = len(text_elem)
+            if text_length <= 10:
+                vol_elem_spaced = "6------6"
             if text_length > 10:
-                vol_elem = "6" + "-" * text_length + "6---"
+                vol_elem_spaced = "6" + "-" * text_length + "6"
+            vol_elem = vol_elem_spaced + vol_elem.split('6')[-1]
+        elif vol_elem[0] in "34":
+            num_hyphens = vol_elem.count("-")
+            vol_elem += "-" * (3 - num_hyphens)
         comb_text_and_vol_rev_spacing.append((text_elem, vol_elem))
+    comb_text_and_vol_rev_spacing.append(comb_text_and_vol[-1])
     return comb_text_and_vol_rev_spacing
 
 
@@ -112,7 +130,7 @@ def _align_word(text_syls: List[str], volpiano_word: str) -> List[Tuple[str, str
     returns [list[tuple[str, str]]]: list of tuples of text syllables and
         volpiano syllables aligned together
     """
-    vol_syls = re.findall(r".*?-{2,3}", volpiano_word)
+    vol_syls = VOLPIANO_SYLLABLE_REGEX.findall(volpiano_word)
     # Squash final syllables of a word together if there are more
     # syllables in the text than in the volpiano.
     if len(text_syls) > len(vol_syls):
@@ -150,12 +168,12 @@ def _align_section(
     logging.debug("Aligning section - Text: %s", text_section)
     logging.debug("Aligning section - Volpiano: %s", volpiano_section)
     comb_section = []
-    # For sections with missing music, both text and volpiano should have
-    # a single element (text is an unsyllabified phrase and volpiano has
-    # a missing music indicator ("6")). If the text section has more elements
-    # (an error), flatten the text section to a single string.
-    if volpiano_section.startswith("6"):
-        if len(text_section) == 0 and len(text_section[0]) == 0:
+    # For sections of missing music, of barline indicators, or of other
+    # areas with unsyllabified texts (e.g., incipits) the text
+    # should have a single unsyllabified element. If the text section has
+    # more elements (an error), flatten the text section to a single string.
+    if volpiano_section[0] in "346" or text_section[0][0].startswith("~") or text_section[0][0].startswith("["):
+        if len(text_section) == 1 and len(text_section[0]) == 1:
             comb_section.append((text_section[0][0], volpiano_section))
         else:
             logging.debug("Text section has more than expected elements. Flattening.")
@@ -164,22 +182,8 @@ def _align_section(
                 flattened_section.extend(word)
             full_text = "".join(flattened_section)
             comb_section.append((full_text, volpiano_section))
-    # For unsyllabified sections of text, the text section section should have a single
-    # element. If it does, align the complete volpiano section to this element. If not
-    # (an error), flatten the text section to a single string and combine.
-    elif text_section[0][0].startswith("~") or text_section[0][0].startswith("["):
-        if len(text_section) == 0 and len(text_section[0]) == 0:
-            comb_section.append((text_section[0][0], volpiano_section))
-        else:
-            logging.debug("Text section has more than expected elements. Flattening.")
-            flattened_section = []
-            for word in text_section:
-                flattened_section.extend(word)
-            full_text = "".join(flattened_section)
-            comb_section.append((full_text, volpiano_section))
-    # Otherwise, align the sections word by word.
     else:
-        vol_words = re.findall(r".*?---", volpiano_section)
+        vol_words = VOLPIANO_WORD_REGEX.findall(volpiano_section)
         for txt_word, vol_word in zip_longest(text_section, vol_words, fillvalue="--"):
             if txt_word == "--":
                 txt_word = [""]
@@ -222,7 +226,7 @@ def align_text_and_volpiano(
     # Section volpiano to match text sections returned by syllabify_text
     # Split at clefs, barlines, and missing music markers, removing empty
     # sections created by the split.
-    volpiano_sections = re.split(r"([134]-*|6-*6-*)", volpiano)
+    volpiano_sections = VOLPIANO_SECTIONING_REGEX.split(volpiano)
     volpiano_sections = list(filter(lambda x: x != "", volpiano_sections))
     logging.debug("Volpiano sections: %s", volpiano_sections)
     if len(volpiano_sections) == len(syllabified_text) + 2:
