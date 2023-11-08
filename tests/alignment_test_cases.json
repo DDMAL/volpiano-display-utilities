@@ -254,9 +254,28 @@
         ]
     },
     {
-        "case_name": "Test alignment: improper clef",
+        "case_name": "Test alignment: improper clef, preceding characters ",
         "text_input": "in diebus eius obsessa est",
-        "vol_input": "-j---1--f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "vol_input": "-j---1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["di-", "df--"],
+            ["e-", "f--"],
+            ["bus", "f---"],
+            ["e-", "f--"],
+            ["ius", "efgfe---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "4"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: improper clef, improper spacing",
+        "text_input": "in diebus eius obsessa est",
+        "vol_input": "1--f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
