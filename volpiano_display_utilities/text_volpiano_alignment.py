@@ -14,7 +14,9 @@ from .cantus_text_syllabification import syllabify_text
 
 # A string containing all valid volpiano characters in Cantus
 # Database. Used to check for invalid characters.
-INVALID_VOLPIANO_CHARS_REGEX = re.compile(r"[^\-19abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]")
+INVALID_VOLPIANO_CHARS_REGEX = re.compile(
+    r"[^\-19abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]"
+)
 
 # Matches any material before the clef, the clef itself, and
 # any following spacing in a volpiano string.
@@ -57,7 +59,7 @@ def _preprocess_volpiano(raw_volpiano_str: str) -> str:
     vol_clef_fin_bar_added = (
         vol_clef_added.rstrip("3").rstrip("4").rstrip("-") + "---" + last_char
     )
-    processed_vol = INVALID_VOLPIANO_CHARS_REGEX.sub("",vol_clef_fin_bar_added)
+    processed_vol = INVALID_VOLPIANO_CHARS_REGEX.sub("", vol_clef_fin_bar_added)
     logging.debug("Preprocessed volpiano string: %s", processed_vol)
     return processed_vol
 
@@ -89,7 +91,7 @@ def _postprocess_spacing(
                 vol_elem_spaced = "6------6"
             if text_length > 10:
                 vol_elem_spaced = "6" + "-" * text_length + "6"
-            vol_elem = vol_elem_spaced + vol_elem.split('6')[-1]
+            vol_elem = vol_elem_spaced + vol_elem.split("6")[-1]
         elif vol_elem[0] in "34":
             num_hyphens = vol_elem.count("-")
             vol_elem += "-" * (3 - num_hyphens)
@@ -151,7 +153,11 @@ def _align_section(
     # areas with unsyllabified texts (e.g., incipits) the text
     # should have a single unsyllabified element. If the text section has
     # more elements (an error), flatten the text section to a single string.
-    if volpiano_section[0] in "346" or text_section[0][0].startswith("~") or text_section[0][0].startswith("["):
+    if (
+        volpiano_section[0] in "346"
+        or text_section[0][0].startswith("~")
+        or text_section[0][0].startswith("[")
+    ):
         if len(text_section) == 1 and len(text_section[0]) == 1:
             comb_section.append((text_section[0][0], volpiano_section))
         else:
