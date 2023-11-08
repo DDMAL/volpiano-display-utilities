@@ -21,7 +21,7 @@ VALID_VOLPIANO_CHARS = "-19abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]"
 STARTING_MATERIAL = re.compile(r".*1-*")
 
 
-def _preprocess_volpiano(volpiano_str: str) -> str:
+def _preprocess_volpiano(raw_volpiano_str: str) -> str:
     """
     Prepares volpiano string for alignment with text:
     - Checks for any invalid characters
@@ -31,23 +31,24 @@ def _preprocess_volpiano(volpiano_str: str) -> str:
         music indicators ("6")
     - Ensures volpiano string has an ending barline ("3" or "4")
 
-    volpiano_str [str]: volpiano string
+    raw_volpiano_str [str]: unprocessed volpiano string
 
     returns [str]: preprocessed volpiano string
     """
     processed_str = ""
-    # Remove existing clefs
-    volpiano_str = STARTING_MATERIAL.sub("", volpiano_str)
-    volpiano_str = "1---" + volpiano_str
-    volpiano_str_len = len(volpiano_str)
-    for i, char in enumerate(volpiano_str):
+    # Remove existing clef and any material preceding the
+    # clef. Re-add a "clean" starting clef.
+    vol_clef_rmvd = STARTING_MATERIAL.sub("", raw_volpiano_str)
+    vol_clef_added = "1---" + vol_clef_rmvd
+    vol_str_len = len(vol_clef_added)
+    for i, char in enumerate(vol_clef_added):
         # Check if char is valid
         if char not in VALID_VOLPIANO_CHARS:
             logging.debug("Removed invalid character (%s) in volpiano string.", char)
             continue
         # Check if char is a barline or missing music indicator and ensure
         # proper spacing
-        if (char in "346") and (i != volpiano_str_len - 1):
+        if (char in "346") and (i != vol_str_len - 1):
             # Add proper spacing before barline
             while processed_str[-3:] != "---":
                 processed_str += "-"
@@ -55,7 +56,7 @@ def _preprocess_volpiano(volpiano_str: str) -> str:
             processed_str += char
             # Add proper spacing after barline
             num_hyph_next = sum(
-                1 for _ in takewhile(lambda x: x == "-", volpiano_str[i + 1 :])
+                1 for _ in takewhile(lambda x: x == "-", vol_clef_added[i + 1 :])
             )
             processed_str += "-" * (3 - num_hyph_next)
             continue
