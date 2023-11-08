@@ -8,17 +8,17 @@ Use align_text_and_volpiano to align the text and melody strings of a chant.
 """
 import re
 import logging
-from itertools import zip_longest, takewhile
+from itertools import zip_longest
 from typing import List, Tuple
 from .cantus_text_syllabification import syllabify_text
 
 # A string containing all valid volpiano characters in Cantus
 # Database. Used to check for invalid characters.
-VALID_VOLPIANO_CHARS = "-19abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]"
+INVALID_VOLPIANO_CHARS_REGEX = re.compile(r"[^\-19abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]")
 
 # Matches any material before the clef, the clef itself, and
 # any following spacing in a volpiano string.
-STARTING_MATERIAL = re.compile(r".*1-*")
+STARTING_MATERIAL_REGEX = re.compile(r".*1-*")
 
 # Split sections of volpiano on clefs, barline markers, and missing
 # music indicators. Includes spacing (hyphens) and section markers (7's)
@@ -46,10 +46,9 @@ def _preprocess_volpiano(raw_volpiano_str: str) -> str:
 
     returns [str]: preprocessed volpiano string
     """
-    processed_str = ""
     # Remove existing clef and any material preceding the
     # clef. Re-add a "clean" starting clef.
-    vol_clef_rmvd = STARTING_MATERIAL.sub("", raw_volpiano_str)
+    vol_clef_rmvd = STARTING_MATERIAL_REGEX.sub("", raw_volpiano_str)
     vol_clef_added = "1---" + vol_clef_rmvd
     # Remove existing ending bar line and add a "clean" ending barline.
     last_char = vol_clef_added[-1]
@@ -58,29 +57,9 @@ def _preprocess_volpiano(raw_volpiano_str: str) -> str:
     vol_clef_fin_bar_added = (
         vol_clef_added.rstrip("3").rstrip("4").rstrip("-") + "---" + last_char
     )
-    vol_str_len = len(vol_clef_fin_bar_added)
-    for i, char in enumerate(vol_clef_fin_bar_added):
-        # Check if char is valid
-        if char not in VALID_VOLPIANO_CHARS:
-            logging.debug("Removed invalid character (%s) in volpiano string.", char)
-            continue
-        # Check if char is a barline or missing music indicator and ensure
-        # proper spacing
-        # if (char in "346") and (i != vol_str_len - 1):
-        #     # Add proper spacing before barline
-        #     while processed_str[-3:] != "---":
-        #         processed_str += "-"
-        #     # Add barline character
-        #     processed_str += char
-        #     # Add proper spacing after barline
-        #     num_hyph_next = sum(
-        #         1 for _ in takewhile(lambda x: x == "-", vol_clef_fin_bar_added[i + 1 :])
-        #     )
-        #     processed_str += "-" * (3 - num_hyph_next)
-        #     continue
-        processed_str += char
-    logging.debug("Preprocessed volpiano string: %s", processed_str)
-    return processed_str
+    processed_vol = INVALID_VOLPIANO_CHARS_REGEX.sub("",vol_clef_fin_bar_added)
+    logging.debug("Preprocessed volpiano string: %s", processed_vol)
+    return processed_vol
 
 
 def _postprocess_spacing(
