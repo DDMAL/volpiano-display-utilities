@@ -84,7 +84,13 @@ def _postprocess_spacing(
         to associated text length
     """
     comb_text_and_vol_rev_spacing = []
-    for text_elem, vol_elem in comb_text_and_vol[:-1]:
+    # Spacing for the opening clef and final barline of the
+    # volpiano string are handled in the preprocessing function
+    # so we don't need to deal with those here.
+    beg_clef_section = comb_text_and_vol[0]
+    fin_bar_section = comb_text_and_vol[-1]
+    comb_text_and_vol_rev_spacing.append(beg_clef_section)
+    for text_elem, vol_elem in comb_text_and_vol[1:-1]:
         if vol_elem[0] == "6":
             text_length = len(text_elem)
             if text_length <= 10:
@@ -96,7 +102,7 @@ def _postprocess_spacing(
             num_hyphens = vol_elem.count("-")
             vol_elem += "-" * (3 - num_hyphens)
         comb_text_and_vol_rev_spacing.append((text_elem, vol_elem))
-    comb_text_and_vol_rev_spacing.append(comb_text_and_vol[-1])
+    comb_text_and_vol_rev_spacing.append(fin_bar_section)
     return comb_text_and_vol_rev_spacing
 
 
@@ -153,13 +159,15 @@ def _align_section(
     # areas with unsyllabified texts (e.g., incipits) the text
     # should have a single unsyllabified element. If the text section has
     # more elements (an error), flatten the text section to a single string.
+    first_text_word = text_section[0]
+    first_text_syl = first_text_word[0]
     if (
         volpiano_section[0] in "346"
-        or text_section[0][0].startswith("~")
-        or text_section[0][0].startswith("[")
+        or first_text_syl.startswith("~")
+        or first_text_syl.startswith("[")
     ):
-        if len(text_section) == 1 and len(text_section[0]) == 1:
-            comb_section.append((text_section[0][0], volpiano_section))
+        if len(text_section) == 1 and len(first_text_word) == 1:
+            comb_section.append((first_text_syl, volpiano_section))
         else:
             logging.debug("Text section has more than expected elements. Flattening.")
             flattened_section = []
