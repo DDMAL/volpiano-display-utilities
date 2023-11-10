@@ -107,9 +107,26 @@
         ]
     },
     {
-        "case_name": "Test alignment: Missing music encoded without proper number of internal hyphens",
+        "case_name": "Test alignment: Missing music encoded with too few internal hyphens",
         "text_input": "in {diebus} e- {ius} obsessa est",
-        "vol_input": "1---f---6----6---f---6------6---g--hg-hgf--ef-gef---ed---3",
+        "vol_input": "1---f---6--6---f---6----6---g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
+            ["", "1---"],
+            ["in", "f---"],
+            ["{diebus}", "6------6---"],
+            ["e-", "f---"],
+            ["{ius}", "6------6---"],
+            ["ob-", "g--"],
+            ["ses-", "hg-hgf--"],
+            ["sa", "ef-gef---"],
+            ["est", "ed---"],
+            ["", "3"]
+        ]
+    },
+    {
+        "case_name": "Test alignment: Missing music encoded with too many internal hyphens",
+        "text_input": "in {diebus} e- {ius} obsessa est",
+        "vol_input": "1---f---6-------6---f---6-----------6---g--hg-hgf--ef-gef---ed---3",
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
