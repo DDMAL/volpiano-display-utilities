@@ -133,7 +133,9 @@ def _align_word(text_syls: List[str], volpiano_word: str) -> List[Tuple[str, str
         vol_syls[-1] += "-" * (len(txt_joined_overhanging_syls) - len(vol_syls[-1]) + 1)
     # Pad text syllables with empty strings if more syllables in the
     # volpiano than in the text.
-    comb_wrd = list(zip_longest(text_syls, vol_syls, fillvalue=""))
+    comb_wrd: List[Tuple[str, str]] = list(
+        zip_longest(text_syls, vol_syls, fillvalue="")
+    )
     return comb_wrd
 
 
@@ -154,7 +156,7 @@ def _align_section(
     """
     logging.debug("Aligning section - Text: %s", text_section)
     logging.debug("Aligning section - Volpiano: %s", volpiano_section)
-    comb_section = []
+    comb_section: List[Tuple[str, str]] = []
     # For sections of missing music, of barline indicators, or of other
     # areas with unsyllabified texts (e.g., incipits) the text
     # should have a single unsyllabified element. If the text section has
@@ -208,18 +210,18 @@ def align_text_and_volpiano(
     returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
         as (text_str, volpiano_str)
     """
-    syllabified_text = syllabify_text(
+    syllabified_text: List[List[List[str]]] = syllabify_text(
         chant_text,
         clean_text=clean_text,
         flatten_result=False,
         text_presyllabified=text_presyllabified,
     )
     # Performs some validation on the passed volpiano string
-    volpiano = _preprocess_volpiano(volpiano)
+    preprocessed_volpiano: str = _preprocess_volpiano(volpiano)
     # Section volpiano to match text sections returned by syllabify_text
     # Split at clefs, barlines, and missing music markers, removing empty
     # sections created by the split.
-    volpiano_sections = VOLPIANO_SECTIONING_REGEX.split(volpiano)
+    volpiano_sections = VOLPIANO_SECTIONING_REGEX.split(preprocessed_volpiano)
     volpiano_sections = list(filter(lambda x: x != "", volpiano_sections))
     logging.debug("Volpiano sections: %s", volpiano_sections)
     if len(volpiano_sections) == len(syllabified_text) + 2:
@@ -227,7 +229,7 @@ def align_text_and_volpiano(
         comb_text_and_vol = [("", volpiano_sections[0])]
         # For each interior section, align the section
         for vol_sec, txt_sec in zip(volpiano_sections[1:-1], syllabified_text):
-            aligned_section = _align_section(txt_sec, vol_sec)
+            aligned_section: List[Tuple[str, str]] = _align_section(txt_sec, vol_sec)
             comb_text_and_vol.extend(aligned_section)
         # Add the final barline with no text
         comb_text_and_vol.append(("", volpiano_sections[-1]))
@@ -236,6 +238,6 @@ def align_text_and_volpiano(
             """Volpiano and text sections do not match. Ensure appropriate
             barlines and section markers are present in both."""
         )
-    comb_text_and_vol = _postprocess_spacing(comb_text_and_vol)
-    logging.debug("Combined text and volpiano: %s", comb_text_and_vol)
-    return comb_text_and_vol
+    aligned_txt_and_vol: List[Tuple[str, str]] = _postprocess_spacing(comb_text_and_vol)
+    logging.debug("Combined text and volpiano: %s", aligned_txt_and_vol)
+    return aligned_txt_and_vol
