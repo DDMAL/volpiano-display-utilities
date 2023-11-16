@@ -429,5 +429,47 @@
             ["cens", "dc---"],
             ["", "3"]
         ]
+    },
+    {
+        "case_name":"Test alignment: Volpiano missing section barlines",
+        "text_input":"in diebus | eius | obsessa est",
+        "vol_input":"1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---3",
+        "expected_result":[
+            ["","1---"],
+            ["in","f---"],
+            ["di-","df--"],
+            ["e-","f--"],
+            ["bus","f---"],
+            ["|","3---"],
+            ["e-","f--"],
+            ["ius","efgfe---"],
+            ["|","3---"],
+            ["ob-","g--"],
+            ["ses-","hg-hgf--"],
+            ["sa","ef-gef---"],
+            ["est","ed---"],
+            ["","3"]
+        ]
+    },
+    {
+        "case_name":"Test alignment: Text missing section barlines",
+        "text_input":"in diebus eius obsessa est",
+        "vol_input":"1---f---df--f--f---4---f--efgfe---4---g--hg-hgf--ef-gef---ed---3",
+        "expected_result":[
+            ["","1---"],
+            ["in","f---"],
+            ["di-","df--"],
+            ["e-","f--"],
+            ["bus","f---"],
+            ["|","4---"],
+            ["e-","f--"],
+            ["ius","efgfe---"],
+            ["|","4---"],
+            ["ob-","g--"],
+            ["ses-","hg-hgf--"],
+            ["sa","ef-gef---"],
+            ["est","ed---"],
+            ["","3"]
+        ]
     }
 ]
