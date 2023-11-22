@@ -13,12 +13,15 @@ from typing import List, Tuple
 from .cantus_text_syllabification import syllabify_text
 
 # A string containing all valid volpiano characters in Cantus
-# Database. Used to check for invalid characters.
+# Database. Used to check for invalid characters. Note that
+# the "1" character (a clef) is not included here, as it is
+# only valid at the start of a string, and is handled separately in
+# the _preprocess_volpiano function.
 INVALID_VOLPIANO_CHARS_REGEX = re.compile(
     r"[^\-9abcdefghijklmnopqrsyz)ABCDEFGHIJKLMNOPQRSYZ3467]"
 )
 
-# Matches any material before the clef, the clef itself, and
+# Matches any material before the first clef, the clef itself, and
 # any following spacing in a volpiano string.
 STARTING_MATERIAL_REGEX = re.compile(r"^.*?1-*")
 
@@ -53,9 +56,9 @@ def _preprocess_volpiano(raw_volpiano_str: str) -> Tuple[str, str, str]:
     """
     # Remove existing clef and any material preceding the
     # clef.
-    vol_clef_rmvd = STARTING_MATERIAL_REGEX.sub("", raw_volpiano_str)
+    vol_clef_rmvd: str = STARTING_MATERIAL_REGEX.sub("", raw_volpiano_str)
     # Remove existing ending bar line and add a "clean" ending barline.
-    last_char = vol_clef_rmvd[-1]
+    last_char: str = vol_clef_rmvd[-1]
     if last_char not in "34":
         last_char = "3"
     vol_clef_fin_bar_rmvd = vol_clef_rmvd.rstrip("3").rstrip("4").rstrip("-") + "---"
@@ -83,12 +86,12 @@ def _postprocess_spacing(
         volpiano syllables with spacing of missing music sections responsive
         to associated text length
     """
-    comb_text_and_vol_rev_spacing = []
+    comb_text_and_vol_rev_spacing: List[Tuple[str, str]] = []
     # Spacing for the opening clef and final barline of the
     # volpiano string are handled in the preprocessing function
     # so we don't need to deal with those here.
-    beg_clef_section = comb_text_and_vol[0]
-    fin_bar_section = comb_text_and_vol[-1]
+    beg_clef_section: Tuple[str, str] = comb_text_and_vol[0]
+    fin_bar_section: Tuple[str, str] = comb_text_and_vol[-1]
     comb_text_and_vol_rev_spacing.append(beg_clef_section)
     for text_elem, vol_elem in comb_text_and_vol[1:-1]:
         if vol_elem[0] == "6":
@@ -192,10 +195,11 @@ def _align_section(
     # areas with unsyllabified texts (e.g., incipits) the text
     # should have a single unsyllabified element. If the text section has
     # more elements (an error), flatten the text section to a single string.
-    # This is aligned to all the volpiano in the section (the volpiano will
-    # have been split into a single syllable in the case of missing music or
-    # barline indicators, or into multiple syllables in the case of other unsyllabified
-    # text)
+    # This is aligned to all the volpiano in the section (during the
+    # volpiano syllabification step, the volpiano will either have stayed
+    # a single syllable in the case of missing music or a pipe "|"
+    # or have been split into multiple syllables in the case of other
+    # unsyllabified text)
     first_text_word = text_section[0]
     first_text_syl = first_text_word[0]
     first_vol_word = volpiano_section[0]
@@ -244,24 +248,28 @@ def _infer_barlines(
 
     This logic provides a "correct" alignment in cases where a barline was simply not
     encoded in one part, but where encoding otherwise aligns (see test cases
-    "Test alignment: Volpiano missing section barlines in text" and "Test alignment:
-    Text missing section barlines in volpiano") and an "incorrect" but still readable
+    "Test alignment: Volpiano missing section barlines" and "Test alignment:
+    Text missing section barlines") and an "incorrect" but still readable
     alignment in cases where other encoding errors are also present (for
     example, a missing barline in one part and a missing word break in the other; see
-    "Test alignment: Missing section barlines with misalignment").
-
+    "Test alignment: Volpiano missing section barlines with syllable mismatch" and
+    "Test alignment: Text missing section barlines with syllable mismatch").
     """
-    vol_w_inferred_barlines = []
-    text_w_inferred_barlines = []
+    vol_w_inferred_barlines: List[List[List[str]]] = []
+    text_w_inferred_barlines: List[List[List[str]]] = []
     while len(syllabified_text) > 0 and len(syllabified_volpiano) > 0:
-        text_words = syllabified_text.pop(0)
-        vol_words = syllabified_volpiano.pop(0)
+        text_words: List[List[str]] = syllabified_text.pop(0)
+        vol_words: List[List[str]] = syllabified_volpiano.pop(0)
         # acc_text_syls and acc_vol_syls are cummulative counts, by word,
         # of the number of syllables in text_section and vol_section, respectively
-        acc_text_syls = list(accumulate([len(txt_word) for txt_word in text_words]))
-        acc_vol_syls = list(accumulate([len(vol_word) for vol_word in vol_words]))
-        num_text_syls = acc_text_syls[-1]
-        num_vol_syls = acc_vol_syls[-1]
+        acc_text_syls: List[int] = list(
+            accumulate([len(txt_word) for txt_word in text_words])
+        )
+        acc_vol_syls: List[int] = list(
+            accumulate([len(vol_word) for vol_word in vol_words])
+        )
+        num_text_syls: int = acc_text_syls[-1]
+        num_vol_syls: int = acc_vol_syls[-1]
         logging.debug("Text section: %s Volpiano section: %s", text_words, vol_words)
         # If equal number of syllables in the sections,
         # keep the sections as they are and remove them from
