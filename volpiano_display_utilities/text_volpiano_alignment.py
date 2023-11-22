@@ -229,6 +229,7 @@ def _align_section(
     logging.debug("Aligned section: %s", comb_section)
     return comb_section
 
+
 def _infer_barlines(
     syllabified_text: List[List[List[str]]], syllabified_volpiano: List[List[List[str]]]
 ) -> Tuple[List[List[List[str]]], List[List[List[str]]]]:
@@ -278,8 +279,8 @@ def _infer_barlines(
             logging.debug(
                 "Text section has more syllables than volpiano section. Inferring barline in text."
             )
-            len_txt_sect_1 = (
-                len(list(takewhile(lambda x: x < num_vol_syls, acc_text_syls)))
+            len_txt_sect_1 = len(
+                list(takewhile(lambda x: x < num_vol_syls, acc_text_syls))
             )
             if abs(num_vol_syls - acc_text_syls[len_txt_sect_1 - 1]) > abs(
                 num_vol_syls - acc_text_syls[len_txt_sect_1]
@@ -297,8 +298,8 @@ def _infer_barlines(
             logging.debug(
                 "Volpiano section has more syllables than text section. Inferring barline in volpiano."
             )
-            len_vol_sect_1 = (
-                len(list(takewhile(lambda x: x < num_text_syls, acc_vol_syls)))
+            len_vol_sect_1 = len(
+                list(takewhile(lambda x: x < num_text_syls, acc_vol_syls))
             )
             if abs(num_text_syls - acc_vol_syls[len_vol_sect_1 - 1]) > abs(
                 num_text_syls - acc_vol_syls[len_vol_sect_1]
