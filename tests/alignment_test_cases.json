@@ -492,7 +492,7 @@
         ]
     },
     {
-        "case_name":"Test alignment: Volpiano missing section barlines in text with syllable mismatch",
+        "case_name":"Test alignment: Volpiano missing section barlines with syllable mismatch",
         "text_input":"in diebus | eius | obsessa est",
         "vol_input":"1---f--df--f--f---f-efgfe---g--hg-hgf--efgef---ed---3",
         "expected_result":[
@@ -513,7 +513,7 @@
         ]
     },
     {
-        "case_name":"Test alignment: Text missing section barlines in volpiano with syllable mismatch",
+        "case_name":"Test alignment: Text missing section barlines with syllable mismatch",
         "text_input":"in diebus eius obsessa est",
         "vol_input":"1---f--df--f--f---4---f-efgfe---4---g--hg-hgf--ef-gef---ed---3",
         "expected_result":[
