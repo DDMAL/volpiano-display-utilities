@@ -86,13 +86,13 @@ def _postprocess_spacing(
         volpiano syllables with spacing of missing music sections responsive
         to associated text length
     """
-    comb_text_and_vol_rev_spacing: List[Tuple[str, str]] = []
+    combined_text_and_vol_revised_spacing: List[Tuple[str, str]] = []
     # Spacing for the opening clef and final barline of the
     # volpiano string are handled in the preprocessing function
     # so we don't need to deal with those here.
     beg_clef_section: Tuple[str, str] = comb_text_and_vol[0]
     fin_bar_section: Tuple[str, str] = comb_text_and_vol[-1]
-    comb_text_and_vol_rev_spacing.append(beg_clef_section)
+    combined_text_and_vol_revised_spacing.append(beg_clef_section)
     for text_elem, vol_elem in comb_text_and_vol[1:-1]:
         if vol_elem[0] == "6":
             text_length = len(text_elem)
@@ -104,9 +104,9 @@ def _postprocess_spacing(
         elif vol_elem[0] in "34":
             num_hyphens = vol_elem.count("-")
             vol_elem += "-" * (3 - num_hyphens)
-        comb_text_and_vol_rev_spacing.append((text_elem, vol_elem))
-    comb_text_and_vol_rev_spacing.append(fin_bar_section)
-    return comb_text_and_vol_rev_spacing
+        combined_text_and_vol_revised_spacing.append((text_elem, vol_elem))
+    combined_text_and_vol_revised_spacing.append(fin_bar_section)
+    return combined_text_and_vol_revised_spacing
 
 
 def _syllabify_volpiano(volpiano: str) -> List[List[List[str]]]:
