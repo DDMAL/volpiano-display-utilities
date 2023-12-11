@@ -12,9 +12,11 @@ or README for more details.
 
 import re
 import logging
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, cast
 
 from .latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
+
+SyllabifiedStr = List[List[List[str]]]
 
 EXCEPTIONS_DICT = {
     "euouae": ["e-", "u-", "o-", "u-", "a-", "e"],
@@ -184,9 +186,9 @@ def syllabify_text(
                     ]
                     logging.debug("Presyllabified word: %s", word)
                 else:
-                    word_syllable_boundaries = syllabify_word(
+                    word_syllable_boundaries = cast(List[int],syllabify_word(
                         prepared_word, return_string=False
-                    )
+                    ))
                     syllabified_word = split_word_by_syl_bounds(
                         prepared_word, word_syllable_boundaries
                     )
@@ -199,11 +201,11 @@ def syllabify_text(
         syllabified_text.append(syllabified_section)
     logging.debug("Syllabified text: %s", syllabified_text)
     if flatten_result:
-        syllabified_text = stringify_syllabified_text(syllabified_text)
+        return stringify_syllabified_text(syllabified_text)
     return syllabified_text
 
 
-def stringify_syllabified_text(syllabified_text: List[List[List[str]]]) -> str:
+def stringify_syllabified_text(syllabified_text: SyllabifiedStr) -> str:
     """
     Courtesy function that flattens the output of syllabify_text
     into a single string of syllables with syllables separated by
