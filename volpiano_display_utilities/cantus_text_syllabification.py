@@ -114,14 +114,9 @@ def syllabify_text(
         This function finds a syllable split if and only if a hyphen is
         present (ie. no additional syllabification is performed).
 
-    returns [SyllabifiedStr]: by default, a nested list of strings.
-    The return value is a list of text sections, each containing a list of "words"
-    (these may be actual words, symbols like "|", or strings of text that won't be
-    syllabified). Each "word" is a list of syllables.
-
-    For example:
-    >>> syllabify_text("Ave Maria | ~gratia [plena] | Dominus tecum")
-    [[['A', 've'], ['Ma', 'ri', 'a']], [['|']], [['~gratia'], ['[plena]']], [['|']], [['Do', 'mi', 'nus'], ['te', 'cum']]]
+    returns [SyllabifiedTextSection]: an object of class SyllabifiedTextSection
+        that contains the syllabified text string. See class docstring for more
+        information.
     """
 
     logging.debug("Syllabifying text: %s", text)

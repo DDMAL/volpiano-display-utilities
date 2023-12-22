@@ -52,6 +52,19 @@ def _zip_and_align(
 
 
 def _align_word(text: List[str], volpiano: List[str]) -> List[Tuple[str, str]]:
+    """
+    Aligns corresponding words of text and volpiano, syllable by syllable. In cases
+    where the text and volpiano are not the same length, the shorter of the two
+    is padded with extra syllables ("---" in the case of volpiano and "" in the
+    case of text) to match the length of the longer. Additionally, if necessary,
+    each syllable of volpiano is padded to ensure it is at least as long as its
+    corresponding syllable of text.
+
+    text [list[str]]: list of text syllables
+    volpiano [list[str]]: list of volpiano syllables
+
+    returns [list[tuple[str, str]]]: list of tuples of text and volpiano syllables
+    """
     zipped_word = _zip_and_align(text, volpiano, pad_text="", pad_volpiano="---")
     aligned_word = []
     for text_syl, vol_syl in zipped_word[:-1]:
@@ -68,8 +81,17 @@ def _align_section(
     volpiano_section: SyllabifiedVolpianoSection,
 ) -> List[Tuple[str, str]]:
     """
-    Aligns a section of text and volpiano, padding in case
-    either text or volpiano is longer or shorter for that section.
+    Aligns a section of text and volpiano. In sections of syllabified
+    text, these are aligned word by word, padding (with additional words:
+    "----" in the case of volpiano and "" in the case of text) if
+    either the two sections have different numbers of words. In sections
+    of unsyllabified text, the text is aligned to the entire volpiano
+    section.
+
+    text_section [SyllabifiedTextSection]: section of text
+    volpiano_section [SyllabifiedVolpianoSection]: section of volpiano
+
+    returns [list[tuple[str, str]]]: list of tuples of text and volpiano syllables
     """
     logging.debug(
         "Aligning section - Text: %s. Volpiano: %s", text_section, volpiano_section
@@ -133,6 +155,17 @@ def _add_text_barline(
     section_to_split_idx: int,
     split_word_idx: int,
 ) -> List[SyllabifiedTextSection]:
+    """
+    Adds a barline to a syllabified text in the specified section at the
+    specified word.
+
+    syllabified_str [list[SyllabifiedTextSection]]: list of syllabified text sections
+    section_to_split_idx [int]: index of section to split
+    split_word_idx [int]: index of word to make first word of new section
+
+    returns [list[SyllabifiedTextSection]]: list of syllabified text sections with
+        barline added
+    """
     section_to_split = syllabified_str[section_to_split_idx]
     logging.debug(
         "Adding barline to text %s at word %s", section_to_split, split_word_idx
@@ -153,6 +186,17 @@ def _add_volpiano_barline(
     section_to_split_idx: int,
     split_word_idx: int,
 ) -> List[SyllabifiedVolpianoSection]:
+    """
+    Adds a barline to a syllabified volpiano in the specified section at the
+    specified word.
+
+    syllabified_str [list[SyllabifiedVolpianoSection]]: list of syllabified volpiano sections
+    section_to_split_idx [int]: index of section to split
+    split_word_idx [int]: index of word to make first word of new section
+
+    returns [list[SyllabifiedVolpianoSection]]: list of syllabified volpiano sections with
+        barline added
+    """
     section_to_split = syllabified_str[section_to_split_idx]
     logging.debug(
         "Adding barline to volpiano %s at word %s", section_to_split, split_word_idx
@@ -180,6 +224,12 @@ def _infer_barlines(
     in either string; other cases that might result in a section mismatch (e.g.,
     improperly encoded text aligned with missing music) are more complex and not
     inferred here.
+
+    syllabified_text [list[SyllabifiedTextSection]]: list of syllabified text sections
+    syllabified_volpiano [list[SyllabifiedVolpianoSection]]: list of syllabified volpiano sections
+
+    returns [tuple[list[SyllabifiedTextSection], list[SyllabifiedVolpianoSection]]]: tuple of
+        syllabified text and volpiano sections
     """
     num_barlines_text = sum(section.is_barline for section in syllabified_text)
     num_barlines_volpiano = sum(section.is_barline for section in syllabified_volpiano)
@@ -228,11 +278,11 @@ def align_text_and_volpiano(
 
     chant_text [str]: the text of a chant
     volpiano [str]: the volpiano for a chant
-    text_presyllabified [bool]: whether the text is already syllabified. Passed
-        to syllabify_text (see that functions documentation for more details). Defaults
-        to False.
     clean_text [bool]: whether to clean the text before syllabifying. Passed to
         syllabify_text (see that functions documentation for more details). Defaults
+        to False.
+    text_presyllabified [bool]: whether the text is already syllabified. Passed
+        to syllabify_text (see that functions documentation for more details). Defaults
         to False.
 
     returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
