@@ -83,8 +83,11 @@ def syllabify_volpiano(volpiano: str) -> List[SyllabifiedVolpianoSection]:
             vol_syls = VOLPIANO_SYLLABLE_REGEX.findall(vol_word)
             syllabified_words.append(vol_syls)
         syllabified_volpiano.append(SyllabifiedVolpianoSection(syllabified_words))
-    logging.debug("Syllabified volpiano: %s", ", ".join(str(s) for s in syllabified_volpiano))
+    logging.debug(
+        "Syllabified volpiano: %s", ", ".join(str(s) for s in syllabified_volpiano)
+    )
     return syllabified_volpiano
+
 
 def ensure_end_of_word_spacing(volpiano: str) -> str:
     """
@@ -98,7 +101,10 @@ def ensure_end_of_word_spacing(volpiano: str) -> str:
         return volpiano.rstrip("-") + "---"
     return volpiano
 
-def adjust_music_spacing(volpiano_syllable: str, text_length: int, end_of_word: bool) -> str:
+
+def adjust_music_spacing(
+    volpiano_syllable: str, text_length: int, end_of_word: bool
+) -> str:
     """
     Adds spacing to a volpiano syllable if necessary so no gaps
     appear in staff between syllables. Ensures that the volpiano
@@ -114,6 +120,7 @@ def adjust_music_spacing(volpiano_syllable: str, text_length: int, end_of_word: 
     if end_of_word:
         volpiano_syllable = ensure_end_of_word_spacing(volpiano_syllable)
     return volpiano_syllable
+
 
 def adjust_missing_music_spacing(volpiano: str, text_length: int) -> str:
     """

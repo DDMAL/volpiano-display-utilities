@@ -1,5 +1,6 @@
 from typing import List
 
+
 class SyllabifiedSection:
     def __init__(self, section: List[List[str]]):
         self.section = section
@@ -19,7 +20,6 @@ class SyllabifiedSection:
         Returns the syllable of the section with the given syllable number.
         """
         return self.section[word_num][syllable_num]
-
 
 
 class SyllabifiedTextSection(SyllabifiedSection):
