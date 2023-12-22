@@ -1,3 +1,7 @@
+"""
+Functions for syllabifying volpiano strings into sections, words, and syllables.
+"""
+
 import re
 from typing import List, Tuple
 import logging
@@ -34,14 +38,14 @@ def preprocess_volpiano(raw_volpiano_str: str) -> Tuple[str, str]:
     Prepares volpiano string for alignment with text:
     - Checks for any invalid characters
     - Ensure volpiano begins with a clef followed by three hyphens. Assume
-        that anything entered before a clef should be removed.
+        that anything entered before the first clef should be removed, and
+        that any additional clefs are erroneous.
     - Ensures volpiano string has an ending barline ("3" or "4")
 
     raw_volpiano_str [str]: unprocessed volpiano string
 
-    returns Tuple[str, str, str]: preprocessed volpiano string without
-        beginning clef or final barline, the clef
-        at the beginning of the volpiano string, and the final barline
+    returns [Tuple[str, str]]: preprocessed volpiano string without
+        beginning clef or final barline and the final barline
         of the volpiano string
     """
     # Remove existing clef and any material preceding the
@@ -59,14 +63,13 @@ def preprocess_volpiano(raw_volpiano_str: str) -> Tuple[str, str]:
 
 def syllabify_volpiano(volpiano: str) -> List[SyllabifiedVolpianoSection]:
     """
-    Splits the volpiano string into
-    sections, words, and syllables to match the structure of syllabified text
-    from cantus_text_syllabification.syllabify_text.
+    Splits the volpiano string into sections, words, and syllables.
 
     volpiano [str]: volpiano string
 
-    returns [Syllabification]: A syllabification object containing the
-        syllabified volpiano string.
+    returns [List[SyllabifiedVolpianoSection]: An object of class
+        SyllabifiedVolpianoSection containing the syllabified volpiano
+        string. See syllabified_section.py for more information.
     """
     volpiano_sections: List[str] = VOLPIANO_SECTIONING_REGEX.split(volpiano)
     # Filter out empty sections created by the split
@@ -106,9 +109,10 @@ def adjust_music_spacing(
     volpiano_syllable: str, text_length: int, end_of_word: bool
 ) -> str:
     """
-    Adds spacing to a volpiano syllable if necessary so no gaps
-    appear in staff between syllables. Ensures that the volpiano
-    syllable is at least as long as the text syllable.
+    Adjust trailing hyphens in volpiano syllables to ensure there
+    are no gaps in the rendered staff. Ensures that the volpiano
+    syllable is at least as long as the text syllable and that
+    final volpiano syllables end with three hyphens.
 
     text_syllable [str]: syllable of text
     volpiano_syllable [str]: syllable of volpiano

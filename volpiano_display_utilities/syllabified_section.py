@@ -1,7 +1,17 @@
+"""
+Defines the SyllabifiedSection class and subclasses for syllabified text and
+volpiano. SyllabifiedSection objects are used to store syllabified text and
+volpiano and the provide methods useful for the alignment process. 
+"""
+
 from typing import List
 
 
 class SyllabifiedSection:
+    """
+    Base class for SyllabifiedTextSection and SyllabifiedVolpianoSection.
+    """
+
     def __init__(self, section: List[List[str]]):
         self.section = section
 
@@ -23,6 +33,15 @@ class SyllabifiedSection:
 
 
 class SyllabifiedTextSection(SyllabifiedSection):
+    """
+    Class containing a syllabified section of text. The section attribute is a
+    list of lists of strings: each element of the outer list is a word, and each
+    element of the inner list is a syllable of that word.
+
+    A list of these classes (one for each section of text) is returned by the
+    cantus_text_syllabification.syllabify_text() function.
+    """
+
     @property
     def is_syllabified(self) -> bool:
         """
@@ -44,6 +63,15 @@ class SyllabifiedTextSection(SyllabifiedSection):
 
 
 class SyllabifiedVolpianoSection(SyllabifiedSection):
+    """
+    Class containing a syllabified section of volpiano. The section attribute is
+    a list of lists of strings: each element of the outer list is a word, and
+    each element of the inner list is a syllable of that word.
+
+    A list of these classes (one for each section of volpiano) is returned by
+    volpiano_syllabification.syllabify_volpiano() function.
+    """
+
     @property
     def is_barline(self) -> bool:
         """
@@ -59,6 +87,11 @@ class SyllabifiedVolpianoSection(SyllabifiedSection):
         return self.section[0][0].startswith("6")
 
     def flatten_to_str(self) -> str:
+        """
+        Flattens the syllabified section of volpiano into a string.
+
+        returns [str]: flattened volpiano string.
+        """
         # First combine syllables into words.
         word_list: List[str] = []
         for word in self.section:
