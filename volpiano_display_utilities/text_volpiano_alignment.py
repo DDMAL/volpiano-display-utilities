@@ -21,8 +21,9 @@ from .volpiano_syllabification import (
 T = TypeVar("T", str, List)
 
 
-
-def _zip_and_align(text: List[T], volpiano: List[T], pad_text: T, pad_volpiano: T) -> List[Tuple[T, T]]:
+def _zip_and_align(
+    text: List[T], volpiano: List[T], pad_text: T, pad_volpiano: T
+) -> List[Tuple[T, T]]:
     """
     Aligns lists of text and volpiano together and adds padding
     if necessary. Can be used to align sections (in which case the
@@ -39,7 +40,9 @@ def _zip_and_align(text: List[T], volpiano: List[T], pad_text: T, pad_volpiano: 
     len_text = len(text)
     len_volpiano = len(volpiano)
     if len_text == len_volpiano:
-        logging.debug("Text and volpiano have equal number of words: zipped with no padding.")
+        logging.debug(
+            "Text and volpiano have equal number of words: zipped with no padding."
+        )
         return list(zip(text, volpiano))
     if len_text > len_volpiano:
         logging.debug("Text longer than volpiano: padding volpiano.")
@@ -47,16 +50,18 @@ def _zip_and_align(text: List[T], volpiano: List[T], pad_text: T, pad_volpiano: 
     logging.debug("Volpiano longer than text: padding text.")
     return list(zip_longest(text, volpiano, fillvalue=pad_text))
 
+
 def _align_word(text: List[str], volpiano: List[str]) -> List[Tuple[str, str]]:
     zipped_word = _zip_and_align(text, volpiano, pad_text="", pad_volpiano="---")
     aligned_word = []
-    for text_syl, vol_syl in zipped_word[:-1]:  
+    for text_syl, vol_syl in zipped_word[:-1]:
         vol_syl = adjust_music_spacing(vol_syl, len(text_syl), False)
         aligned_word.append((text_syl, vol_syl))
     text_syl, vol_syl = zipped_word[-1]
     vol_syl = adjust_music_spacing(vol_syl, len(text_syl), True)
     aligned_word.append((text_syl, vol_syl))
     return aligned_word
+
 
 def _align_section(
     text_section: SyllabifiedTextSection,
@@ -88,7 +93,9 @@ def _align_section(
         # - If neither, no additional processing occurs.
         flattened_volpiano = volpiano_section.flatten_to_str()
         if volpiano_section.is_barline:
-            processed_volpiano = adjust_music_spacing(flattened_volpiano, len(unsyllabified_text), True)
+            processed_volpiano = adjust_music_spacing(
+                flattened_volpiano, len(unsyllabified_text), True
+            )
             comb_section.append((unsyllabified_text, processed_volpiano))
         elif volpiano_section.is_missing_music:
             processed_volpiano = adjust_missing_music_spacing(
@@ -101,33 +108,67 @@ def _align_section(
         # In sections of syllabified text, align text and volpiano
         # word by word.
         logging.debug("Aligning words in section with syllabified text.")
-        aligned_words = _zip_and_align(text_section.section, volpiano_section.section, pad_text=[""], pad_volpiano=["----"])
+        aligned_words = _zip_and_align(
+            text_section.section,
+            volpiano_section.section,
+            pad_text=[""],
+            pad_volpiano=["----"],
+        )
         logging.debug("Aligned words: %s", aligned_words)
         for txt_word, vol_word in aligned_words:
             # Align each word of text and volpiano in the section
             # syllable by syllable.
-            logging.debug("Aligning syllables in word. Text: %s. Volpiano: %s", txt_word, vol_word)
+            logging.debug(
+                "Aligning syllables in word. Text: %s. Volpiano: %s", txt_word, vol_word
+            )
             comb_wrd = _align_word(txt_word, vol_word)
             logging.debug("Aligned syllables: %s", comb_wrd)
             comb_section.extend(comb_wrd)
     logging.debug("Aligned section: %s", comb_section)
     return comb_section
 
-def _add_text_barline(syllabified_str: List[SyllabifiedTextSection], section_to_split_idx: int, split_word_idx: int) -> List[SyllabifiedTextSection]:
+
+def _add_text_barline(
+    syllabified_str: List[SyllabifiedTextSection],
+    section_to_split_idx: int,
+    split_word_idx: int,
+) -> List[SyllabifiedTextSection]:
     section_to_split = syllabified_str[section_to_split_idx]
-    logging.debug("Adding barline to text %s at word %s", section_to_split, split_word_idx)
-    syllabified_str[section_to_split_idx] = SyllabifiedTextSection(section_to_split.section[:split_word_idx])
+    logging.debug(
+        "Adding barline to text %s at word %s", section_to_split, split_word_idx
+    )
+    syllabified_str[section_to_split_idx] = SyllabifiedTextSection(
+        section_to_split.section[:split_word_idx]
+    )
     syllabified_str.insert(section_to_split_idx + 1, SyllabifiedTextSection([["|"]]))
-    syllabified_str.insert(section_to_split_idx + 2, SyllabifiedTextSection(section_to_split.section[split_word_idx:]))
+    syllabified_str.insert(
+        section_to_split_idx + 2,
+        SyllabifiedTextSection(section_to_split.section[split_word_idx:]),
+    )
     return syllabified_str
 
-def _add_volpiano_barline(syllabified_str: List[SyllabifiedVolpianoSection], section_to_split_idx: int, split_word_idx: int) -> List[SyllabifiedVolpianoSection]:
+
+def _add_volpiano_barline(
+    syllabified_str: List[SyllabifiedVolpianoSection],
+    section_to_split_idx: int,
+    split_word_idx: int,
+) -> List[SyllabifiedVolpianoSection]:
     section_to_split = syllabified_str[section_to_split_idx]
-    logging.debug("Adding barline to volpiano %s at word %s", section_to_split, split_word_idx)
-    syllabified_str[section_to_split_idx] = SyllabifiedVolpianoSection(section_to_split.section[:split_word_idx])
-    syllabified_str.insert(section_to_split_idx + 1, SyllabifiedVolpianoSection([["3---"]]))
-    syllabified_str.insert(section_to_split_idx + 2, SyllabifiedVolpianoSection(section_to_split.section[split_word_idx:]))
+    logging.debug(
+        "Adding barline to volpiano %s at word %s", section_to_split, split_word_idx
+    )
+    syllabified_str[section_to_split_idx] = SyllabifiedVolpianoSection(
+        section_to_split.section[:split_word_idx]
+    )
+    syllabified_str.insert(
+        section_to_split_idx + 1, SyllabifiedVolpianoSection([["3---"]])
+    )
+    syllabified_str.insert(
+        section_to_split_idx + 2,
+        SyllabifiedVolpianoSection(section_to_split.section[split_word_idx:]),
+    )
     return syllabified_str
+
 
 def _infer_barlines(
     syllabified_text: List[SyllabifiedTextSection],
@@ -143,19 +184,28 @@ def _infer_barlines(
     num_barlines_text = sum(section.is_barline for section in syllabified_text)
     num_barlines_volpiano = sum(section.is_barline for section in syllabified_volpiano)
     if num_barlines_text == num_barlines_volpiano:
-        raise ValueError("Text and volpiano have equal number of barlines. Section alignment cannot be inferred.")
+        raise ValueError(
+            "Text and volpiano have equal number of barlines. Section alignment cannot be inferred."
+        )
     while num_barlines_text != num_barlines_volpiano:
-        num_words_diff: List[int] = [abs(text_sec.num_words - vol_sec.num_words) for text_sec, vol_sec in zip(syllabified_text, syllabified_volpiano)]
+        num_words_diff: List[int] = [
+            abs(text_sec.num_words - vol_sec.num_words)
+            for text_sec, vol_sec in zip(syllabified_text, syllabified_volpiano)
+        ]
         max_diff_idx = num_words_diff.index(max(num_words_diff))
         if num_barlines_text > num_barlines_volpiano:
-            logging.debug("Text has more barlines than volpiano. Inferring additional barline in volpiano.")
+            logging.debug(
+                "Text has more barlines than volpiano. Inferring additional barline in volpiano."
+            )
             syllabified_volpiano = _add_volpiano_barline(
                 syllabified_volpiano,
                 max_diff_idx,
                 syllabified_text[max_diff_idx].num_words,
             )
         else:
-            logging.debug("Volpiano has more barlines than text. Inferring additional barline in text.")
+            logging.debug(
+                "Volpiano has more barlines than text. Inferring additional barline in text."
+            )
             syllabified_text = _add_text_barline(
                 syllabified_text,
                 max_diff_idx,
@@ -163,7 +213,9 @@ def _infer_barlines(
             )
         # Update numbers of barlines for next step in loop
         num_barlines_text = sum(1 for section in syllabified_text if section.is_barline)
-        num_barlines_volpiano = sum(1 for section in syllabified_volpiano if section.is_barline)
+        num_barlines_volpiano = sum(
+            1 for section in syllabified_volpiano if section.is_barline
+        )
     return syllabified_text, syllabified_volpiano
 
 
