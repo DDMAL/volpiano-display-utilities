@@ -14,7 +14,11 @@ from volpiano_display_utilities.cantus_text_syllabification import (
     _prepare_string_for_syllabification,
     _split_text_sections,
     syllabify_text,
-    stringify_syllabified_text,
+)
+from volpiano_display_utilities.volpiano_syllabification import (
+    preprocess_volpiano,
+    syllabify_volpiano,
+    adjust_missing_music_spacing,
 )
 from volpiano_display_utilities.text_volpiano_alignment import align_text_and_volpiano
 
@@ -61,13 +65,12 @@ class TestWordSyllabification(unittest.TestCase):
                     expected,
                 )
 
-
 class TestCantusTextSyllabification(unittest.TestCase):
     """
     Tests functions in cantus_text_syllabification.
     """
 
-    def test_clean_test(self):
+    def test_clean_text(self):
         """Tests _clean_text."""
         initial_text = "abcdefg @#$&*[^@]#${}|~[]/|\\"
         expected_text = "abcdefg #[]#{}|~[]|"
@@ -102,12 +105,6 @@ class TestCantusTextSyllabification(unittest.TestCase):
             "amen",
         ]
         self.assertEqual(_split_text_sections(start_str), sectioned)
-
-    def test_stringify_syllabified_text(self):
-        """Tests stringify_syllabified_text."""
-        syllabified_text = [[["Sanc-", "tus"], ["sanc-", "tus"], ["sanc-", "tus"]]]
-        exp_result = "Sanc-tus sanc-tus sanc-tus"
-        self.assertEqual(stringify_syllabified_text(syllabified_text), exp_result)
 
     def test_syllabify_text(self):
         """Tests syllabify_text. Constructs a test string with all possible cases."""
@@ -194,8 +191,10 @@ class TestCantusTextSyllabification(unittest.TestCase):
         ]
         for test_case in test_cases:
             with self.subTest(test_case["case_name"]):
+                syllabified_text = syllabify_text(test_case["test_string"])
+                syllabified_text_list = [section.section for section in syllabified_text]
                 self.assertEqual(
-                    syllabify_text(test_case["test_string"]),
+                    syllabified_text_list,
                     test_case["expected_result"],
                 )
         # Test presyllabified text
@@ -236,11 +235,72 @@ class TestCantusTextSyllabification(unittest.TestCase):
             [["ecce"], ["enim"], ["ex"], ["hoc"], ["be-", "a-", "tam"]],
         ]
         with self.subTest("Presyllabified Text"):
+            syllabified_text = syllabify_text(presyllabified_text, text_presyllabified=True)
+            syllabified_text_list = [section.section for section in syllabified_text]
             self.assertEqual(
-                syllabify_text(presyllabified_text, text_presyllabified=True),
+                syllabified_text_list,
                 expected_result,
             )
 
+class TestVolpianoSyllabification(unittest.TestCase):
+    """
+    Tests functions for syllabifying volpiano in volpiano_syllabification.py.
+    """
+    def test_preprocess_volpiano(self):
+        with self.subTest("Remove starting material"):
+            standard_volpiano = "1---g---h---3"
+            volpiano_with_extra_starting_matter = "tf-g-1---g-1--h---3"
+            expected = ("g---h---", "3")
+            self.assertEqual(preprocess_volpiano(standard_volpiano), expected)
+            self.assertEqual(preprocess_volpiano(volpiano_with_extra_starting_matter), expected)
+
+    def test_syllabify_volpiano(self):
+        volpiano = (
+            # Section divided by barline "3" + standard spacing
+            "a-b--c---d---e---3---"
+            # Section divided by barline "4" + standard spacing
+            "a-b--c---d---e---4---"
+            # Section divided by barline "3" + non-standard spacing
+            "a-b--c---d---e-3--"
+            # Section divided by barline "4" + break encoded
+            "a-b--c---d---e---47---"
+            # Missing music section
+            "a-b--c---6------6---"
+            # Missing music section with break encoded
+            "a-b--c---6------6---77"
+        )
+        expected = [
+            [["a-b--","c---"], ["d---"], ["e---"]], [["3---"]],
+            [["a-b--","c---"], ["d---"], ["e---"]], [["4---"]],
+            [["a-b--","c---"], ["d---"], ["e-"]], [["3--"]],
+            [["a-b--","c---"], ["d---"], ["e---"]], [["47---"]],
+            [["a-b--","c---"]], [["6------6---"]],
+            [["a-b--","c---"]], [["6------6---77"]]
+        ]
+        syllabified_volpiano = syllabify_volpiano(volpiano)
+        syllabified_volpiano_list = [section.section for section in syllabified_volpiano]
+        self.assertEqual(syllabified_volpiano_list, expected)
+
+    def test_adjust_missing_music_spacing(self):
+        with self.subTest("Not a missing music section"):
+            volpiano = "a-b--c---"
+            text_length = 3
+            self.assertRaises(ValueError, adjust_missing_music_spacing, volpiano, text_length)
+        with self.subTest("Missing music with fewer than 10 chars"):
+            volpiano = "6------6---"
+            text_length = 4
+            expected = "6------6---"
+            self.assertEqual(adjust_missing_music_spacing(volpiano, text_length), expected)
+        with self.subTest("Missing music with more than 10 chars"):
+            volpiano = "6------6---"
+            text_length = 14
+            expected = "6--------------6---"
+            self.assertEqual(adjust_missing_music_spacing(volpiano, text_length), expected)
+        with self.subTest("Missing music with break encoded"):
+            volpiano = "6------677---"
+            text_length = 8
+            expected = "6------677---"
+            self.assertEqual(adjust_missing_music_spacing(volpiano, text_length), expected)
 
 class TestTextVolpianoAlignment(unittest.TestCase):
     """
@@ -269,5 +329,6 @@ class TestTextVolpianoAlignment(unittest.TestCase):
                 result = align_text_and_volpiano(
                     test_case["text_input"],
                     test_case["vol_input"],
+                    clean_text=True
                 )
                 self.assertEqual(result, test_case["expected_result"])

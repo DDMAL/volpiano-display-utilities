@@ -12,11 +12,10 @@ or README for more details.
 
 import re
 import logging
-from typing import Union, Tuple, List, cast
+from typing import Tuple, List, cast
 
 from .latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
-
-SyllabifiedStr = List[List[List[str]]]
+from .syllabified_section import SyllabifiedTextSection
 
 EXCEPTIONS_DICT = {
     "euouae": ["e-", "u-", "o-", "u-", "a-", "e"],
@@ -25,7 +24,6 @@ EXCEPTIONS_DICT = {
     "michael": ["mi-", "cha-", "el"],
 }
 
-# Pre-compiled regex patterns used in this module
 # INVALID_CHAR_REGEX matches any character not valid in Cantus DB entries
 INVALID_CHAR_REGEX = re.compile(r"[^a-zA-Z#~\{\}\[\]\|\- ]")
 # Matches a string that begins with a hyphen
@@ -97,9 +95,8 @@ def _split_text_sections(text: str) -> List[str]:
 def syllabify_text(
     text: str,
     clean_text: bool = False,
-    flatten_result: bool = False,
     text_presyllabified: bool = False,
-) -> Union[List[List[List[str]]], str]:
+) -> List[SyllabifiedTextSection]:
     """
     Syllabifies a text string that has been encoded in the style
     of the Cantus Database. Texts are syllabified word by word,
@@ -109,9 +106,6 @@ def syllabify_text(
     clean_text [bool]: if True, removes invalid characters from
         the text string; if False, raises a ValueError if invalid
         characters are detected
-    flatten_result [bool]: if True, returns a string of the
-        syllabified text (instead of a list of lists) with hyphens separating
-        syllables in syllabified substrings. See returns for more details.
     text_presyllabified [bool]: if True, assumes that an already syllabified
         text string has been passed.  This is useful for cases
         where a CantusDB user has edited the syllabification of a chant text that
@@ -120,17 +114,14 @@ def syllabify_text(
         This function finds a syllable split if and only if a hyphen is
         present (ie. no additional syllabification is performed).
 
-    returns [list[list[list[str]]] or str]: by default, a nested list of strings.
+    returns [SyllabifiedStr]: by default, a nested list of strings.
     The return value is a list of text sections, each containing a list of "words"
     (these may be actual words, symbols like "|", or strings of text that won't be
-    syllabified). Each "word" is a list of syllables. If flatten_result is True, the
-    syllabified text is returned as a single string with hyphens separating syllables.
+    syllabified). Each "word" is a list of syllables.
 
     For example:
-    >>> syllabify_text("Ave Maria | ~gratia [plena] | Dominus tecum", flatten_result=False)
+    >>> syllabify_text("Ave Maria | ~gratia [plena] | Dominus tecum")
     [[['A', 've'], ['Ma', 'ri', 'a']], [['|']], [['~gratia'], ['[plena]']], [['|']], [['Do', 'mi', 'nus'], ['te', 'cum']]]
-    >>> syllabify_text("Ave Maria | ~gratia [plena] | Dominus tecum", flatten_result=True)
-    'A-ve Ma-ri-a | ~gratia [plena] | Do-mi-nus te-cum'
     """
 
     logging.debug("Syllabifying text: %s", text)
@@ -154,7 +145,7 @@ def syllabify_text(
         syllabified_section = []
         if text_section == "|" or text_section[0] in "{~[":
             syllabified_section.append([text_section])
-            syllabified_text.append(syllabified_section)
+            syllabified_text.append(SyllabifiedTextSection(syllabified_section))
             logging.debug("Text section not syllabified: %s", text_section)
             continue
         words = text_section.split(" ")
@@ -186,9 +177,9 @@ def syllabify_text(
                     ]
                     logging.debug("Presyllabified word: %s", word)
                 else:
-                    word_syllable_boundaries = cast(List[int],syllabify_word(
-                        prepared_word, return_string=False
-                    ))
+                    word_syllable_boundaries = cast(
+                        List[int], syllabify_word(prepared_word, return_string=False)
+                    )
                     syllabified_word = split_word_by_syl_bounds(
                         prepared_word, word_syllable_boundaries
                     )
@@ -198,25 +189,6 @@ def syllabify_text(
                 if end_hyphen:
                     syllabified_word[-1] = f"{syllabified_word[-1]}-"
                 syllabified_section.append(syllabified_word)
-        syllabified_text.append(syllabified_section)
-    logging.debug("Syllabified text: %s", syllabified_text)
-    if flatten_result:
-        return stringify_syllabified_text(syllabified_text)
+        syllabified_text.append(SyllabifiedTextSection(syllabified_section))
+    logging.debug("Syllabified text: %s", ", ".join(str(s) for s in syllabified_text))
     return syllabified_text
-
-
-def stringify_syllabified_text(syllabified_text: SyllabifiedStr) -> str:
-    """
-    Courtesy function that flattens the output of syllabify_text
-    into a single string of syllables with syllables separated by
-    hyphens.
-
-    syllabified_text list[list[list[[str]]]: syllabified text in the default
-    output format of syllabify_text
-
-    returns [str]: string of syllabified text
-    """
-    joined_sections = [
-        ["".join(word) for word in section] for section in syllabified_text
-    ]
-    return " ".join([" ".join(section) for section in joined_sections])
