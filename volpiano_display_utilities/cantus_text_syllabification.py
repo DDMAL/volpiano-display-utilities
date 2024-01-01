@@ -187,3 +187,14 @@ def syllabify_text(
         syllabified_text.append(SyllabifiedTextSection(syllabified_section))
     logging.debug("Syllabified text: %s", ", ".join(str(s) for s in syllabified_text))
     return syllabified_text
+
+
+def flatten_syllabified_text(syllabified_text=List[SyllabifiedTextSection]) -> str:
+    """
+    Flattens a list of syllabified text sections to a string.
+
+    syllabified_text [List[SyllabifiedTextSection]]: list of syllabified text sections
+
+    returns [str]: flattened text string
+    """
+    return " ".join([s.flatten_to_str() for s in syllabified_text])
