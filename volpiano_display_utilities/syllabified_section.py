@@ -18,6 +18,9 @@ class SyllabifiedSection:
     def __str__(self):
         return str(self.section)
 
+    def __repr__(self) -> str:
+        return f"SyllabifiedSection: {str(self.section)}"
+
     @property
     def num_words(self) -> int:
         """
@@ -60,6 +63,18 @@ class SyllabifiedTextSection(SyllabifiedSection):
         Returns True if the section is a section endcoding a barline.
         """
         return self.section[0][0][0] == "|"
+
+    def flatten_to_str(self) -> str:
+        """
+        Flattens the text section to a string.
+        """
+        # First combine syllables into words.
+        word_list: List[str] = []
+        for word in self.section:
+            word_list.append("".join(word))
+        # Then join words with spaces.
+        flattened_section: str = " ".join(word_list)
+        return flattened_section
 
 
 class SyllabifiedVolpianoSection(SyllabifiedSection):
