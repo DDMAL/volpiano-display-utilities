@@ -18,15 +18,14 @@ The module requires python >= 3.8.
 ```python
 >>> from cantus_text_syllabification import syllabify_text
 >>> syllabify_text("Agnus dei qui {tollis peccata} mundi | Miserere # | ~Agnus")
-'[[["Ag-","nus"], ["de-","i"], ["qui"]], [["{tollis peccata}"]], [["mun-","di"]], [["|"]], [["Mi-","se-","re-","re"], ["#"]], [["|"]], [["~Agnus"]]]'
+'[SyllabifiedSection: [["Ag-","nus"], ["de-","i"], ["qui"]], SyllabifiedSection: [["{tollis peccata}"]], SyllabifiedSection: [["mun-","di"]], SyllabifiedSection: [["|"]], SyllabifiedSection: [["Mi-","se-","re-","re"], ["#"]], SyllabifiedSection: [["|"]], SyllabifiedSection: [["~Agnus"]]]'
 >>> syllabify_text("Glori@ patr1 &t")
 'ValueError: ...' # Input with invalid characters will raise a value error. 
 ```
 
-The function returns a nested list of strings with the following structure (see diagram):
- - each element of the list is a sublist that contains the syllabification of a section of the chant text. Sections are created when signaled in the chant text by pipes ("|") or when a substring of the chant text should not be syllabified (eg. when it corresponds to missing music -- these are detailed below)
- - each section list is a list of words (for sections where syllabification is necessary) or a list with one element for the whole section (for sections where syllabification is not necessary)
- - each word is a list of syllable strings (if the word needs to be syllabified)
+The function returns a list of SyllabifiedTextSection objects, with one SyllabifiedTextSection object per section of the chant text. Sections are created in the chant text at pipes ("|") or when a substring of the chant text should not be syllabified (eg. when it corresponds to missing music -- these are detailed below). Each SyllabifiedTextSection object has a "section" attribute that contains the syllabification of that section, along with some methods for easy navigation of the section. This syllabification consists of a list of lists:
+ - each element of the outer list is a word (for sections where syllabification is necessary) or a list with one element for the whole section (for sections where syllabification is not necessary)
+ - each element of the inner list is  is a list of syllable strings (if the word needs to be syllabified)
 
 ```mermaid
 flowchart TD
@@ -50,10 +49,16 @@ flowchart TD
     H ----->|"Section not syllabified \n (singleton sublists)"| O["[['~Agnus']]"]
 ```
 
-Argument `flatten_result` modifies the function return value.
+A SyllabifiedTextSection's `flatten_to_str` method flattens a section's contents to a string. The `flatten_syllabified_text` function flattens a list of SyllabifiedTextSections to a single string.
 
 ```python
->>> syllabify_text("Agnus dei qui {tollis peccata} mundi | Miserere # | ~Agnus", flatten_result = True)
+>>> syllabified_text = syllabify_text("Agnus dei qui {tollis peccata} mundi | Miserere # | ~Agnus")
+>>> syllabified_text[0]
+'SyllabifiedSection: [["Ag-","nus"], ["de-","i"], ["qui"]]'
+>>> syllabified_text[0].flatten_to_str()
+"Ag-nus de-i qui"
+>>> from cantus_text_syllabification import flatten_syllabified_text
+>>> flatten_syllabified_text(syllabified_text)
 'Ag-nus de-i qui {tollis peccata} mun-di | Mi-se-re-re # | ~Agnus'
 ```
 
@@ -75,10 +80,10 @@ More details about text entry in Cantus Database can be found at https://cantusd
 
 Text and volpiano are first aligned section by section and then word by word in order to handle cases of overflow as locally as possible and minimize the extent to which minor encoding errors cascade through the entire chant. These are handled as follows:
 
-- *Word has more volpiano syllables than text syllables*: display "extra" volpiano at end of section and add blank syllables ("") in text for spacing
-- *Word has more text syllables than volpiano syllables*: combine "extra" text syllables and display with final volpiano syllable
-- *Section has more volpiano words than text words*: display "extra" volpiano at end of section and add blank words ("") in text for spacing
-- *Section has more text words than volpiano words*: display "extra" words at end of section and add blank staff space ("-") in volpiano for spacing
+- *Word has more volpiano syllables than text syllables*: display "extra" volpiano aligned with blank syllables ("") in the text
+- *Word has more text syllables than volpiano syllables*: display "extra" text syllables aligned with blank staff space ("-") in volpiano
+- *Section has more volpiano words than text words*: display "extra" volpiano at end of section aligned with blank words ("") in text for spacing
+- *Section has more text words than volpiano words*: display "extra" words at end of section aligned with blank staff space ("-") in volpiano
 
 The alignment algorithm also adapts the size of missing music sections in the volpiano to the amount of text associated with the missing music. Sections of missing music are always encoded "6------6" in volpiano, regardless of how long the missing section is. For the purposes of browser display, the module may add additional space (ie. add hyphens between the "6"s) to this section to account for text. 
 
