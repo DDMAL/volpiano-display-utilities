@@ -189,6 +189,17 @@ class TestCantusTextSyllabification(unittest.TestCase):
                     [["~Ipsum [Canticum]"]],
                 ],
             },
+            {
+                "case_name": "Text with incipit in middle of section",
+                "test_string": "et brachium ~sanctum eius | Gloria ~canticum novum",
+                "expected_result": [
+                    [["et"], ["bra-", "chi-", "um"]],
+                    [["~sanctum eius"]],
+                    [["|"]],
+                    [["Glo-", "ri-", "a"]],
+                    [["~canticum novum"]],
+                ],
+            },
         ]
         for test_case in test_cases:
             with self.subTest(test_case["case_name"]):

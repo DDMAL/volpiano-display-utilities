@@ -234,13 +234,15 @@ def _infer_barlines(
     num_barlines_text = sum(section.is_barline for section in syllabified_text)
     num_barlines_volpiano = sum(section.is_barline for section in syllabified_volpiano)
     if num_barlines_text == num_barlines_volpiano:
-        logging.debug("Text and volpiano have equal numbers of barlines. Appending extra sections.")
+        logging.debug(
+            "Text and volpiano have equal numbers of barlines. Appending extra sections."
+        )
         if len(syllabified_text) > len(syllabified_volpiano):
             for _ in range(len(syllabified_text) - len(syllabified_volpiano)):
-                syllabified_volpiano.append(SyllabifiedVolpianoSection(section = [["-"]]))
+                syllabified_volpiano.append(SyllabifiedVolpianoSection(section=[["-"]]))
         else:
             for _ in range(len(syllabified_volpiano) - len(syllabified_text)):
-                syllabified_text.append(SyllabifiedTextSection(section = [[" "]]))
+                syllabified_text.append(SyllabifiedTextSection(section=[[" "]]))
         return syllabified_text, syllabified_volpiano
     while num_barlines_text != num_barlines_volpiano:
         num_words_diff: List[int] = [
