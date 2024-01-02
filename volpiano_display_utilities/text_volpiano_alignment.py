@@ -18,7 +18,7 @@ from .volpiano_syllabification import (
     adjust_missing_music_spacing,
 )
 
-T = TypeVar("T", str, List)
+T = TypeVar("T", str, List, SyllabifiedTextSection, SyllabifiedVolpianoSection)
 
 
 def _zip_and_align(
@@ -223,7 +223,7 @@ def _infer_barlines(
     do not match. We assume that this is the case where a barline was omitted
     in either string; other cases that might result in a section mismatch (e.g.,
     improperly encoded text aligned with missing music) are more complex and not
-    inferred here.
+    inferred here. In that case, the extra sections are simply appended to the end.
 
     syllabified_text [list[SyllabifiedTextSection]]: list of syllabified text sections
     syllabified_volpiano [list[SyllabifiedVolpianoSection]]: list of syllabified volpiano sections
@@ -234,9 +234,14 @@ def _infer_barlines(
     num_barlines_text = sum(section.is_barline for section in syllabified_text)
     num_barlines_volpiano = sum(section.is_barline for section in syllabified_volpiano)
     if num_barlines_text == num_barlines_volpiano:
-        raise ValueError(
-            "Text and volpiano have equal number of barlines. Section alignment cannot be inferred."
-        )
+        logging.debug("Text and volpiano have equal numbers of barlines. Appending extra sections.")
+        if len(syllabified_text) > len(syllabified_volpiano):
+            for _ in range(len(syllabified_text) - len(syllabified_volpiano)):
+                syllabified_volpiano.append(SyllabifiedVolpianoSection(section = [["-"]]))
+        else:
+            for _ in range(len(syllabified_volpiano) - len(syllabified_text)):
+                syllabified_text.append(SyllabifiedTextSection(section = [[" "]]))
+        return syllabified_text, syllabified_volpiano
     while num_barlines_text != num_barlines_volpiano:
         num_words_diff: List[int] = [
             abs(text_sec.num_words - vol_sec.num_words)
