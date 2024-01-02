@@ -45,6 +45,12 @@ class SyllabifiedTextSection(SyllabifiedSection):
     cantus_text_syllabification.syllabify_text() function.
     """
 
+    def __init__(self, section: List[List[str]]):
+        if section:
+            super().__init__(section)
+        else:
+            super().__init__([[" "]])
+
     @property
     def is_syllabified(self) -> bool:
         """
@@ -86,6 +92,12 @@ class SyllabifiedVolpianoSection(SyllabifiedSection):
     A list of these classes (one for each section of volpiano) is returned by
     volpiano_syllabification.syllabify_volpiano() function.
     """
+
+    def __init__(self, section: List[List[str]]):
+        if section:
+            super().__init__(section)
+        else:
+            super().__init__([["-"]])
 
     @property
     def is_barline(self) -> bool:
