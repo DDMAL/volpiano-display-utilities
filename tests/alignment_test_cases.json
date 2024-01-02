@@ -585,5 +585,23 @@
             ["cum","gf-gf---"],
             ["","3"]
         ]
+    },
+    {
+        "case_name":"Text alignment: Consecutive missing music sections",
+        "text_input":"Ave Maria {gratia} {plena dominus} tecum",
+        "vol_input":"1---fgj--jhj-hg---j--gf-ede--f----6------67---6------6---fef--gf-gf---3",
+        "expected_result":[
+            ["","1---"],
+            ["A-","fgj--"],
+            ["ve","jhj-hg---"],
+            ["Ma-","j--"],
+            ["ri-","gf-ede--"],
+            ["a","f----"],
+            ["{gratia}","6------67---"],
+            ["{plena dominus}","6---------------6---"],
+            ["te-","fef--"],
+            ["cum","gf-gf---"],
+            ["","3"]
+        ]
     }
 ]

@@ -31,7 +31,7 @@ STR_BEGINS_W_HYPHEN_REGEX = re.compile(r"^\-")
 # Matches a string that ends with a hyphen
 STR_ENDS_W_HYPHEN_REGEX = re.compile(r"\-$")
 # Matches pipes and missing music sectioners ("{" and "}")
-TEXT_SECTIONER_REGEX = re.compile(r"(\||\{.*?\}(?!\s*?\{))")
+TEXT_SECTIONER_REGEX = re.compile(r"(\||\{.*?\})")
 
 
 def _clean_text(text: str) -> str:

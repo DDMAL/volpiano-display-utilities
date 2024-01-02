@@ -162,7 +162,7 @@ class TestCantusTextSyllabification(unittest.TestCase):
             {
                 "case_name": "Partial Text with All Music Missing",
                 "test_string": "{cantic- #} {#} {# -ovum}",
-                "expected_result": [[["{cantic- #} {#} {# -ovum}"]]],
+                "expected_result": [[["{cantic- #}"]], [["{#}"]], [["{# -ovum}"]]],
             },
             {
                 "case_name": "Text with Section Break",
