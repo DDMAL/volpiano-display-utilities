@@ -217,7 +217,7 @@ Visualization of volpiano-text alignment is useful to ensure that the expected r
 
 ## Contributors & References
 
-Anna De Bakker (@annamorphism) and Geneviève Gates-Panneton (@joyfulgen) contributed to the testing and development of this utility.
+Anna De Bakker (@annamorphism), Geneviève Gates-Panneton (@joyfulgen), Jacob DeGroot-Maggetti (@jacobdgm), and Dylan Hillerbrand (@dchiller) contributed to the testing and development of this utility.
 
 The following resources were used to determine the syllabification rules outlined above:
 
