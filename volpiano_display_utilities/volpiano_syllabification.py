@@ -33,43 +33,35 @@ VOLPIANO_WORD_REGEX = re.compile(r".*?-{3,}|.+$")
 VOLPIANO_SYLLABLE_REGEX = re.compile(r".*?-{2,}|.+$")
 
 
-def prepare_volpiano_for_syllabification(raw_volpiano_str: str) -> Tuple[str, str]:
+def prepare_volpiano_for_syllabification(raw_volpiano_str: str) -> str:
     """
-    Prepares volpiano string for syllabification:
-    - Removes any invalid characters
-    - Ensure volpiano begins with a clef followed by three hyphens. Assume
-        that anything entered before the first clef should be removed, and
-        that any additional clefs are erroneous.
-    - Ensures volpiano string has an ending barline ("3" or "4")
+    Prepare volpiano string for syllabification:
+    - Remove any invalid characters
+    - Remove the opening clef and anything that appears before the
+        opening clef
 
     raw_volpiano_str [str]: unprocessed volpiano string
 
-    returns [Tuple[str, str]]: preprocessed volpiano string without
-        beginning clef or final barline and the final barline
-        of the volpiano string
+    returns [str]: preprocessed volpiano string without
+        beginning clef and invalid characters
     """
     # Remove existing clef and any material preceding the
     # clef.
     vol_clef_rmvd: str = STARTING_MATERIAL_REGEX.sub("", raw_volpiano_str)
-    # Remove existing ending bar line and add a "clean" ending barline.
-    last_char: str = vol_clef_rmvd[-1]
-    if last_char not in "34":
-        last_char = "3"
-    vol_clef_fin_bar_rmvd = vol_clef_rmvd.rstrip("3").rstrip("4").rstrip("-") + "---"
-    processed_vol = INVALID_VOLPIANO_CHARS_REGEX.sub("", vol_clef_fin_bar_rmvd)
+    processed_vol = INVALID_VOLPIANO_CHARS_REGEX.sub("", vol_clef_rmvd)
     logging.debug("Preprocessed volpiano string: %s", processed_vol)
-    return processed_vol, last_char
+    return processed_vol
 
 
 def syllabify_volpiano(volpiano: str) -> List[SyllabifiedVolpianoSection]:
     """
-    Splits the volpiano string into sections, words, and syllables.
+    Split the volpiano string into sections, words, and syllables.
 
     volpiano [str]: volpiano string
 
-    returns [List[SyllabifiedVolpianoSection]: An object of class
-        SyllabifiedVolpianoSection containing the syllabified volpiano
-        string. See syllabified_section.py for more information.
+    returns [List[SyllabifiedVolpianoSection]: An list of SyllabifiedVolpianoSection
+        objects containing the syllabified volpiano string.
+        See syllabified_section.py for more information.
     """
     volpiano_sections: List[str] = VOLPIANO_SECTIONING_REGEX.split(volpiano)
     # Filter out empty sections created by the split
@@ -94,18 +86,18 @@ def syllabify_volpiano(volpiano: str) -> List[SyllabifiedVolpianoSection]:
 
 def ensure_end_of_word_spacing(volpiano: str) -> str:
     """
-    Ensures that a string ends with three hyphens.
+    Ensure that a volpiano "word" ends with three hyphens.
 
     volpiano [str]: volpiano string
 
-    returns [str]: volpiano string ending with a syllable break
+    returns [str]: volpiano string ending with three hyphens
     """
     if volpiano[-3:] != "---":
         return volpiano.rstrip("-") + "---"
     return volpiano
 
 
-def adjust_music_spacing(
+def adjust_volpiano_spacing_for_rendering(
     volpiano_syllable: str, text_length: int, end_of_word: bool
 ) -> str:
     """
@@ -126,7 +118,7 @@ def adjust_music_spacing(
     return volpiano_syllable
 
 
-def adjust_missing_music_spacing(volpiano: str, text_length: int) -> str:
+def adjust_missing_music_spacing_for_rendering(volpiano: str, text_length: int) -> str:
     """
     Adjusts the spacing of a section of missing music to match
     the length of the accompanying text, while preserving any
