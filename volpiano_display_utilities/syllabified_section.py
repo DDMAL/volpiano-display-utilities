@@ -60,7 +60,7 @@ class SyllabifiedTextSection(SyllabifiedSection):
             not self.section[0][0].startswith("~")
             and not self.section[0][0].startswith("[")
             and not self.section[0][0].startswith("{")
-            and not self.section[0][0][0] == "|"
+            and not self.section[0][0] == "|"
         )
 
     @property
@@ -75,9 +75,7 @@ class SyllabifiedTextSection(SyllabifiedSection):
         Flattens the text section to a string.
         """
         # First combine syllables into words.
-        word_list: List[str] = []
-        for word in self.section:
-            word_list.append("".join(word))
+        word_list: List[str] = ["".join(word) for word in self.section]
         # Then join words with spaces.
         flattened_section: str = " ".join(word_list)
         return flattened_section

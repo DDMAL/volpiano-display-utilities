@@ -33,10 +33,10 @@ VOLPIANO_WORD_REGEX = re.compile(r".*?-{3,}|.+$")
 VOLPIANO_SYLLABLE_REGEX = re.compile(r".*?-{2,}|.+$")
 
 
-def preprocess_volpiano(raw_volpiano_str: str) -> Tuple[str, str]:
+def prepare_volpiano_for_syllabification(raw_volpiano_str: str) -> Tuple[str, str]:
     """
-    Prepares volpiano string for alignment with text:
-    - Checks for any invalid characters
+    Prepares volpiano string for syllabification:
+    - Removes any invalid characters
     - Ensure volpiano begins with a clef followed by three hyphens. Assume
         that anything entered before the first clef should be removed, and
         that any additional clefs are erroneous.
