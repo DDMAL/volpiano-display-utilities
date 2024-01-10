@@ -14,16 +14,19 @@ from .syllabified_section import SyllabifiedTextSection, SyllabifiedVolpianoSect
 from .volpiano_syllabification import (
     syllabify_volpiano,
     prepare_volpiano_for_syllabification,
-    adjust_music_spacing,
-    adjust_missing_music_spacing,
+    adjust_volpiano_spacing_for_rendering,
+    adjust_missing_music_spacing_for_rendering,
 )
 
-T = TypeVar("T", str, List, SyllabifiedTextSection, SyllabifiedVolpianoSection)
+SyllableOrWordT = TypeVar("SyllableOrWordT", str, List[str])
 
 
 def _zip_and_align(
-    text: List[T], volpiano: List[T], pad_text: T, pad_volpiano: T
-) -> List[Tuple[T, T]]:
+    text: List[SyllableOrWordT],
+    volpiano: List[SyllableOrWordT],
+    pad_text: SyllableOrWordT,
+    pad_volpiano: SyllableOrWordT,
+) -> List[Tuple[SyllableOrWordT, SyllableOrWordT]]:
     """
     Aligns lists of text and volpiano together and adds padding
     if necessary. Can be used to align sections (in which case the
@@ -68,10 +71,10 @@ def _align_word(text: List[str], volpiano: List[str]) -> List[Tuple[str, str]]:
     zipped_word = _zip_and_align(text, volpiano, pad_text="", pad_volpiano="---")
     aligned_word = []
     for text_syl, vol_syl in zipped_word[:-1]:
-        vol_syl = adjust_music_spacing(vol_syl, len(text_syl), False)
+        vol_syl = adjust_volpiano_spacing_for_rendering(vol_syl, len(text_syl), False)
         aligned_word.append((text_syl, vol_syl))
     text_syl, vol_syl = zipped_word[-1]
-    vol_syl = adjust_music_spacing(vol_syl, len(text_syl), True)
+    vol_syl = adjust_volpiano_spacing_for_rendering(vol_syl, len(text_syl), True)
     aligned_word.append((text_syl, vol_syl))
     return aligned_word
 
@@ -115,12 +118,12 @@ def _align_section(
         # - If neither, no additional processing occurs.
         flattened_volpiano = volpiano_section.flatten_to_str()
         if volpiano_section.is_barline:
-            processed_volpiano = adjust_music_spacing(
+            processed_volpiano = adjust_volpiano_spacing_for_rendering(
                 flattened_volpiano, len(unsyllabified_text), True
             )
             comb_section.append((unsyllabified_text, processed_volpiano))
         elif volpiano_section.is_missing_music:
-            processed_volpiano = adjust_missing_music_spacing(
+            processed_volpiano = adjust_missing_music_spacing_for_rendering(
                 flattened_volpiano, len(unsyllabified_text)
             )
             comb_section.append((unsyllabified_text, processed_volpiano))
@@ -298,7 +301,16 @@ def align_text_and_volpiano(
     syllabified_text = syllabify_text(
         chant_text, clean_text=clean_text, text_presyllabified=text_presyllabified
     )
-    preprocessed_volpiano, fin_bar = prepare_volpiano_for_syllabification(volpiano)
+    preprocessed_volpiano = prepare_volpiano_for_syllabification(volpiano)
+    # If volpiano ends with a proper barline ("3" or "4"), remove it from the string
+    # before syllabification and save it for later. If it does not, syllabify
+    # the volpiano string as is, but add a proper barline (default "3") to the
+    # final alignment.
+    fin_bar = preprocessed_volpiano[-1]
+    if fin_bar not in "34":
+        fin_bar = "3"
+    else:
+        preprocessed_volpiano = preprocessed_volpiano[:-1]
     syllabified_volpiano = syllabify_volpiano(preprocessed_volpiano)
     # Add the opening clef with no text
     aligned_text_and_vol_syls: List[Tuple[str, str]] = [("", "1---")]

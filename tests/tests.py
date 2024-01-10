@@ -18,7 +18,7 @@ from volpiano_display_utilities.cantus_text_syllabification import (
 from volpiano_display_utilities.volpiano_syllabification import (
     prepare_volpiano_for_syllabification,
     syllabify_volpiano,
-    adjust_missing_music_spacing,
+    adjust_missing_music_spacing_for_rendering,
 )
 from volpiano_display_utilities.text_volpiano_alignment import align_text_and_volpiano
 
@@ -268,7 +268,7 @@ class TestVolpianoSyllabification(unittest.TestCase):
         with self.subTest("Remove starting material"):
             standard_volpiano = "1---g---h---3"
             volpiano_with_extra_starting_matter = "tf-g-1---g-1--h---3"
-            expected = ("g---h---", "3")
+            expected = "g---h---3"
             self.assertEqual(
                 prepare_volpiano_for_syllabification(standard_volpiano), expected
             )
@@ -332,33 +332,39 @@ class TestVolpianoSyllabification(unittest.TestCase):
                     test_case["expected_result"],
                 )
 
-    def test_adjust_missing_music_spacing(self):
+    def test_adjust_missing_music_spacing_for_rendering(self):
         with self.subTest("Not a missing music section"):
             volpiano = "a-b--c---"
             text_length = 3
             self.assertRaises(
-                ValueError, adjust_missing_music_spacing, volpiano, text_length
+                ValueError,
+                adjust_missing_music_spacing_for_rendering,
+                volpiano,
+                text_length,
             )
         with self.subTest("Missing music with fewer than 10 chars"):
             volpiano = "6------6---"
             text_length = 4
             expected = "6------6---"
             self.assertEqual(
-                adjust_missing_music_spacing(volpiano, text_length), expected
+                adjust_missing_music_spacing_for_rendering(volpiano, text_length),
+                expected,
             )
         with self.subTest("Missing music with more than 10 chars"):
             volpiano = "6------6---"
             text_length = 14
             expected = "6--------------6---"
             self.assertEqual(
-                adjust_missing_music_spacing(volpiano, text_length), expected
+                adjust_missing_music_spacing_for_rendering(volpiano, text_length),
+                expected,
             )
         with self.subTest("Missing music with break encoded"):
             volpiano = "6------677---"
             text_length = 8
             expected = "6------677---"
             self.assertEqual(
-                adjust_missing_music_spacing(volpiano, text_length), expected
+                adjust_missing_music_spacing_for_rendering(volpiano, text_length),
+                expected,
             )
 
 
