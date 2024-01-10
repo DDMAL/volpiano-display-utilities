@@ -33,12 +33,13 @@ def _zip_and_align(
     text and volpiano arguments are lists of lists) or words (in which
     case the text and volpiano arguments are lists of strings).
 
-    text [list[T]]: text list
-    volpiano [list[T]]: volpiano list
-    pad_text [T]: value to fill text with if text is shorter than volpiano
-    pad_volpiano [T]: value to fill volpiano with if volpiano is shorter than text
+    text [list[SyllableOrWordT]]: text list
+    volpiano [list[SyllableOrWordT]]: volpiano list
+    pad_text [SyllableOrWordT]: value to fill text with if text is shorter than volpiano
+    pad_volpiano [SyllableOrWordT]: value to fill volpiano with if volpiano is shorter than text
 
-    returns [list[tuple[T, T]]]: zipped list with padding
+    returns [list[tuple[SyllableOrWordT, SyllableOrWordT]]]: zipped list of words
+        or syllables with padding
     """
     len_text = len(text)
     len_volpiano = len(volpiano)
