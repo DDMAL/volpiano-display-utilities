@@ -13,7 +13,7 @@ from .cantus_text_syllabification import syllabify_text
 from .syllabified_section import SyllabifiedTextSection, SyllabifiedVolpianoSection
 from .volpiano_syllabification import (
     syllabify_volpiano,
-    preprocess_volpiano,
+    prepare_volpiano_for_syllabification,
     adjust_music_spacing,
     adjust_missing_music_spacing,
 )
@@ -150,7 +150,7 @@ def _align_section(
     return comb_section
 
 
-def _add_text_barline(
+def _insert_text_barline(
     syllabified_str: List[SyllabifiedTextSection],
     section_to_split_idx: int,
     split_word_idx: int,
@@ -181,7 +181,7 @@ def _add_text_barline(
     return syllabified_str
 
 
-def _add_volpiano_barline(
+def _insert_volpiano_barline(
     syllabified_str: List[SyllabifiedVolpianoSection],
     section_to_split_idx: int,
     split_word_idx: int,
@@ -254,7 +254,7 @@ def _infer_barlines(
             logging.debug(
                 "Text has more barlines than volpiano. Inferring additional barline in volpiano."
             )
-            syllabified_volpiano = _add_volpiano_barline(
+            syllabified_volpiano = _insert_volpiano_barline(
                 syllabified_volpiano,
                 max_diff_idx,
                 syllabified_text[max_diff_idx].num_words,
@@ -263,7 +263,7 @@ def _infer_barlines(
             logging.debug(
                 "Volpiano has more barlines than text. Inferring additional barline in text."
             )
-            syllabified_text = _add_text_barline(
+            syllabified_text = _insert_text_barline(
                 syllabified_text,
                 max_diff_idx,
                 syllabified_volpiano[max_diff_idx].num_words,
@@ -298,10 +298,10 @@ def align_text_and_volpiano(
     syllabified_text = syllabify_text(
         chant_text, clean_text=clean_text, text_presyllabified=text_presyllabified
     )
-    preprocessed_volpiano, fin_bar = preprocess_volpiano(volpiano)
+    preprocessed_volpiano, fin_bar = prepare_volpiano_for_syllabification(volpiano)
     syllabified_volpiano = syllabify_volpiano(preprocessed_volpiano)
     # Add the opening clef with no text
-    alignment: List[Tuple[str, str]] = [("", "1---")]
+    aligned_text_and_vol_syls: List[Tuple[str, str]] = [("", "1---")]
     # If the number of sections in the text and volpiano do not match,
     # we need to infer section breaks in the shorter of the strings
     # in order to align them.
@@ -315,8 +315,8 @@ def align_text_and_volpiano(
     # For each interior section, align the section
     for vol_sec, txt_sec in zip(syllabified_volpiano, syllabified_text):
         aligned_section: List[Tuple[str, str]] = _align_section(txt_sec, vol_sec)
-        alignment.extend(aligned_section)
+        aligned_text_and_vol_syls.extend(aligned_section)
     # Add the final barline with no text
-    alignment.append(("", fin_bar))
-    logging.debug("Combined text and volpiano: %s", alignment)
-    return alignment
+    aligned_text_and_vol_syls.append(("", fin_bar))
+    logging.debug("Combined text and volpiano: %s", aligned_text_and_vol_syls)
+    return aligned_text_and_vol_syls

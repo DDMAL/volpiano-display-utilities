@@ -16,7 +16,7 @@ from volpiano_display_utilities.cantus_text_syllabification import (
     syllabify_text,
 )
 from volpiano_display_utilities.volpiano_syllabification import (
-    preprocess_volpiano,
+    prepare_volpiano_for_syllabification,
     syllabify_volpiano,
     adjust_missing_music_spacing,
 )
@@ -264,50 +264,73 @@ class TestVolpianoSyllabification(unittest.TestCase):
     Tests functions for syllabifying volpiano in volpiano_syllabification.py.
     """
 
-    def test_preprocess_volpiano(self):
+    def test_prepare_volpiano_for_alignment(self):
         with self.subTest("Remove starting material"):
             standard_volpiano = "1---g---h---3"
             volpiano_with_extra_starting_matter = "tf-g-1---g-1--h---3"
             expected = ("g---h---", "3")
-            self.assertEqual(preprocess_volpiano(standard_volpiano), expected)
             self.assertEqual(
-                preprocess_volpiano(volpiano_with_extra_starting_matter), expected
+                prepare_volpiano_for_syllabification(standard_volpiano), expected
+            )
+            self.assertEqual(
+                prepare_volpiano_for_syllabification(
+                    volpiano_with_extra_starting_matter
+                ),
+                expected,
             )
 
     def test_syllabify_volpiano(self):
-        volpiano = (
-            # Section divided by barline "3" + standard spacing
-            "a-b--c---d---e---3---"
-            # Section divided by barline "4" + standard spacing
-            "a-b--c---d---e---4---"
-            # Section divided by barline "3" + non-standard spacing
-            "a-b--c---d---e-3--"
-            # Section divided by barline "4" + break encoded
-            "a-b--c---d---e---47---"
-            # Missing music section
-            "a-b--c---6------6---"
-            # Missing music section with break encoded
-            "a-b--c---6------6---77"
-        )
-        expected = [
-            [["a-b--", "c---"], ["d---"], ["e---"]],
-            [["3---"]],
-            [["a-b--", "c---"], ["d---"], ["e---"]],
-            [["4---"]],
-            [["a-b--", "c---"], ["d---"], ["e-"]],
-            [["3--"]],
-            [["a-b--", "c---"], ["d---"], ["e---"]],
-            [["47---"]],
-            [["a-b--", "c---"]],
-            [["6------6---"]],
-            [["a-b--", "c---"]],
-            [["6------6---77"]],
+        volpiano_syllabification_test_cases = [
+            {
+                "case_name": "Section divided by barline '3' + standard spacing",
+                "volpiano": "a-b--c---d---e---3---",
+                "expected_result": [
+                    [["a-b--", "c---"], ["d---"], ["e---"]],
+                    [["3---"]],
+                ],
+            },
+            {
+                "case_name": "Section divided by barline '4' + standard spacing",
+                "volpiano": "a-b--c---d---e---4---",
+                "expected_result": [
+                    [["a-b--", "c---"], ["d---"], ["e---"]],
+                    [["4---"]],
+                ],
+            },
+            {
+                "case_name": "Section divided by barline '3' + non-standard spacing",
+                "volpiano": "a-b--c---d---e-3--",
+                "expected_result": [[["a-b--", "c---"], ["d---"], ["e-"]], [["3--"]]],
+            },
+            {
+                "case_name": "Section divided by barline '4' + break encoded",
+                "volpiano": "a-b--c---d---e---47---",
+                "expected_result": [
+                    [["a-b--", "c---"], ["d---"], ["e---"]],
+                    [["47---"]],
+                ],
+            },
+            {
+                "case_name": "Missing music section",
+                "volpiano": "a-b--c---6------6---",
+                "expected_result": [[["a-b--", "c---"]], [["6------6---"]]],
+            },
+            {
+                "case_name": "Missing music section with break encoded",
+                "volpiano": "a-b--c---6------6---77",
+                "expected_result": [[["a-b--", "c---"]], [["6------6---77"]]],
+            },
         ]
-        syllabified_volpiano = syllabify_volpiano(volpiano)
-        syllabified_volpiano_list = [
-            section.section for section in syllabified_volpiano
-        ]
-        self.assertEqual(syllabified_volpiano_list, expected)
+        for test_case in volpiano_syllabification_test_cases:
+            with self.subTest(test_case["case_name"]):
+                syllabified_volpiano = syllabify_volpiano(test_case["volpiano"])
+                syllabified_volpiano_list = [
+                    section.section for section in syllabified_volpiano
+                ]
+                self.assertEqual(
+                    syllabified_volpiano_list,
+                    test_case["expected_result"],
+                )
 
     def test_adjust_missing_music_spacing(self):
         with self.subTest("Not a missing music section"):
