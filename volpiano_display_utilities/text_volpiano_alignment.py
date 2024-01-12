@@ -225,7 +225,8 @@ def _infer_barlines(
     do not match. We assume that this is the case where a barline was omitted
     in either string; other cases that might result in a section mismatch (e.g.,
     improperly encoded text aligned with missing music) are more complex and not
-    inferred here. In that case, the extra sections are simply appended to the end.
+    dealt with here, except by appending extra empty sections and barline sections
+    to the shorter of the two lists of sections.
 
     syllabified_text [list[SyllabifiedTextSection]]: list of syllabified text sections
     syllabified_volpiano [list[SyllabifiedVolpianoSection]]: list of syllabified volpiano sections
@@ -235,23 +236,20 @@ def _infer_barlines(
     """
     num_barlines_text = sum(section.is_barline for section in syllabified_text)
     num_barlines_volpiano = sum(section.is_barline for section in syllabified_volpiano)
-    if num_barlines_text == num_barlines_volpiano:
-        logging.debug(
-            "Text and volpiano have equal numbers of barlines. Appending extra sections."
-        )
-        if len(syllabified_text) > len(syllabified_volpiano):
-            for _ in range(len(syllabified_text) - len(syllabified_volpiano)):
-                syllabified_volpiano.append(SyllabifiedVolpianoSection(section=[["-"]]))
-        else:
-            for _ in range(len(syllabified_volpiano) - len(syllabified_text)):
-                syllabified_text.append(SyllabifiedTextSection(section=[[" "]]))
-        return syllabified_text, syllabified_volpiano
     while num_barlines_text != num_barlines_volpiano:
+        # Find the section in which the number of words in volpiano and the
+        # number of words in text differ the most. This is where we will insert
+        # our next inferred barline.
         num_words_diff: List[int] = [
             abs(text_sec.num_words - vol_sec.num_words)
             for text_sec, vol_sec in zip(syllabified_text, syllabified_volpiano)
         ]
-        max_diff_idx = num_words_diff.index(max(num_words_diff))
+        max_num_words_diff = max(num_words_diff)
+        max_diff_idx = num_words_diff.index(max_num_words_diff)
+        # If there are no sections where the number of words differ, then
+        # we won't infer any more barlines.
+        if max_num_words_diff == 0:
+            break
         if num_barlines_text > num_barlines_volpiano:
             logging.debug(
                 "Text has more barlines than volpiano. Inferring additional barline in volpiano."
@@ -275,6 +273,22 @@ def _infer_barlines(
         num_barlines_volpiano = sum(
             1 for section in syllabified_volpiano if section.is_barline
         )
+    # Once we have inferred all the barlines we can, we need to make sure
+    # that the number of sections in the text and volpiano match. We do
+    # this by padding the shorter of the two with empty sections and/or
+    # barlines depending on the content of the longer section.
+    if len(syllabified_text) > len(syllabified_volpiano):
+        for addl_text_section in syllabified_text[len(syllabified_volpiano) :]:
+            if addl_text_section.is_barline:
+                syllabified_volpiano.append(SyllabifiedVolpianoSection([["3---"]]))
+            else:
+                syllabified_volpiano.append(SyllabifiedVolpianoSection([[""]]))
+    else:
+        for addl_volpiano_section in syllabified_volpiano[len(syllabified_text) :]:
+            if addl_volpiano_section.is_barline:
+                syllabified_text.append(SyllabifiedTextSection([["|"]]))
+            else:
+                syllabified_text.append(SyllabifiedTextSection([[""]]))
     return syllabified_text, syllabified_volpiano
 
 
