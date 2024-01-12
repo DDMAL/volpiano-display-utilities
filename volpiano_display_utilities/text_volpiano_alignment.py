@@ -118,18 +118,16 @@ def _align_section(
         #  accompanying text.
         # - If neither, no additional processing occurs.
         flattened_volpiano = volpiano_section.flatten_to_str()
-        if volpiano_section.is_barline:
-            processed_volpiano = adjust_volpiano_spacing_for_rendering(
-                flattened_volpiano, len(unsyllabified_text), True
-            )
-            comb_section.append((unsyllabified_text, processed_volpiano))
-        elif volpiano_section.is_missing_music:
+        if volpiano_section.is_missing_music:
             processed_volpiano = adjust_missing_music_spacing_for_rendering(
                 flattened_volpiano, len(unsyllabified_text)
             )
             comb_section.append((unsyllabified_text, processed_volpiano))
         else:
-            comb_section.append((unsyllabified_text, flattened_volpiano))
+            processed_volpiano = adjust_volpiano_spacing_for_rendering(
+                flattened_volpiano, len(unsyllabified_text), True
+            )
+            comb_section.append((unsyllabified_text, processed_volpiano))
     else:
         # In sections of syllabified text, align text and volpiano
         # word by word.
