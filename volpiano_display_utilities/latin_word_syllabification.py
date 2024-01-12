@@ -241,7 +241,9 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
         else:
             split_case = "2 consonants between vowels (consonant group)"
     else:
-        if ltrs_btw_vow_grps[:2] in _CONSONANT_GROUPS:
+        if ltrs_btw_vow_grps[1:] in _CONSONANT_GROUPS:
+            syl_bound = num_ltrs_btw_vow_grps - 2
+        elif ltrs_btw_vow_grps[:2] in _CONSONANT_GROUPS:
             syl_bound = 2
         else:
             syl_bound = 1
