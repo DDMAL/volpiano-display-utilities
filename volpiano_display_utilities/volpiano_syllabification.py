@@ -106,8 +106,10 @@ def adjust_volpiano_spacing_for_rendering(
     syllable is at least as long as the text syllable and that
     final volpiano syllables end with three hyphens.
 
-    text_syllable [str]: syllable of text
     volpiano_syllable [str]: syllable of volpiano
+    text_length [int]: length of associated text syllable
+    end_of_word [bool]: whether volpiano_syllable is at the end
+        of a word
 
     returns [str]: volpiano syllable with spacing added if necessary
     """
