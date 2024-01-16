@@ -241,6 +241,11 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
         else:
             split_case = "2 consonants between vowels (consonant group)"
     else:
+        # in situations where 3 or more consonants are between consecutive vowels,
+        # group the final two consonants, if possible (amplius -> am-pl-ius). If not,
+        # group the first two consonants (coniunctos -> con-iunc-tos), if possible. If
+        # neither the final two nor first two consonants can be grouped, split after
+        # the first consonant.
         if ltrs_btw_vow_grps[1:] in _CONSONANT_GROUPS:
             syl_bound = num_ltrs_btw_vow_grps - 2
         elif ltrs_btw_vow_grps[:2] in _CONSONANT_GROUPS:
