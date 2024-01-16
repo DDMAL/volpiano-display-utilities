@@ -72,10 +72,10 @@ def _align_word(text: List[str], volpiano: List[str]) -> List[Tuple[str, str]]:
     zipped_word = _zip_and_align(text, volpiano, pad_text="", pad_volpiano="---")
     aligned_word = []
     for text_syl, vol_syl in zipped_word[:-1]:
-        vol_syl = adjust_volpiano_spacing_for_rendering(vol_syl, len(text_syl), False)
+        vol_syl = adjust_volpiano_spacing_for_rendering(vol_syl, len(text_syl), end_of_word = False)
         aligned_word.append((text_syl, vol_syl))
     text_syl, vol_syl = zipped_word[-1]
-    vol_syl = adjust_volpiano_spacing_for_rendering(vol_syl, len(text_syl), True)
+    vol_syl = adjust_volpiano_spacing_for_rendering(vol_syl, len(text_syl), end_of_word = True)
     aligned_word.append((text_syl, vol_syl))
     return aligned_word
 
@@ -125,7 +125,7 @@ def _align_section(
             comb_section.append((unsyllabified_text, processed_volpiano))
         else:
             processed_volpiano = adjust_volpiano_spacing_for_rendering(
-                flattened_volpiano, len(unsyllabified_text), True
+                flattened_volpiano, len(unsyllabified_text), end_of_word = True
             )
             comb_section.append((unsyllabified_text, processed_volpiano))
     else:
