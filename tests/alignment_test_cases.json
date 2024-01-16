@@ -471,10 +471,10 @@
         ]
     },
     {
-        "case_name":"Test alignment: Volpiano missing section barlines",
-        "text_input":"in diebus | eius | obsessa est",
-        "vol_input":"1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---3",
-        "expected_result":[
+        "case_name": "Test alignment: Volpiano missing section barlines",
+        "text_input": "in diebus | eius | obsessa est",
+        "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
             ["","1---"],
             ["in","f---"],
             ["di-","df--"],
@@ -492,10 +492,10 @@
         ]
     },
     {
-        "case_name":"Test alignment: Text missing section barlines",
-        "text_input":"in diebus eius obsessa est",
-        "vol_input":"1---f---df--f--f---4---f--efgfe---4---g--hg-hgf--ef-gef---ed---3",
-        "expected_result":[
+        "case_name": "Test alignment: Text missing section barlines",
+        "text_input": "in diebus eius obsessa est",
+        "vol_input": "1---f---df--f--f---4---f--efgfe---4---g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
             ["","1---"],
             ["in","f---"],
             ["di-","df--"],
@@ -513,10 +513,10 @@
         ]
     },
     {
-        "case_name":"Test alignment: Volpiano missing section barlines with syllable mismatch",
-        "text_input":"in diebus | eius | obsessa est",
-        "vol_input":"1---f--df--f--f---f-efgfe---g--hg-hgf--efgef---ed---3",
-        "expected_result":[
+        "case_name": "Test alignment: Volpiano missing section barlines with syllable mismatch",
+        "text_input": "in diebus | eius | obsessa est",
+        "vol_input": "1---f--df--f--f---f-efgfe---g--hg-hgf--efgef---ed---3",
+        "expected_result": [
             ["","1---"],
             ["in","f--"],
             ["","df--"],
@@ -538,10 +538,10 @@
         ]
     },
     {
-        "case_name":"Test alignment: Text missing section barlines with syllable mismatch",
-        "text_input":"in diebus eius obsessa est",
-        "vol_input":"1---f--df--f--f--4---f-efgfe---4---g--hg-hgf--ef-gef---ed---3",
-        "expected_result":[
+        "case_name": "Test alignment: Text missing section barlines with syllable mismatch",
+        "text_input": "in diebus eius obsessa est",
+        "vol_input": "1---f--df--f--f--4---f-efgfe---4---g--hg-hgf--ef-gef---ed---3",
+        "expected_result": [
             ["","1---"],
             ["in","f--"],
             ["","df--"],
@@ -563,10 +563,10 @@
         ]
     },
     {
-        "case_name":"Test alignment: Too many hyphens after words",
-        "text_input":"Ave Maria gratia plena dominus tecum",
-        "vol_input":"1---fgj--jhj-hg---j--gf-ede--f----kh--j--gj---fg--g---fh--jh-gh--g------fef--gf-gf---3",
-        "expected_result":[
+        "case_name": "Test alignment: Too many hyphens after words",
+        "text_input": "Ave Maria gratia plena dominus tecum",
+        "vol_input": "1---fgj--jhj-hg---j--gf-ede--f----kh--j--gj---fg--g---fh--jh-gh--g------fef--gf-gf---3",
+        "expected_result": [
             ["","1---"],
             ["A-","fgj--"],
             ["ve","jhj-hg---"],
@@ -587,10 +587,10 @@
         ]
     },
     {
-        "case_name":"Text alignment: Consecutive missing music sections",
-        "text_input":"Ave Maria {gratia} {plena dominus} tecum",
-        "vol_input":"1---fgj--jhj-hg---j--gf-ede--f----6------67---6------6---fef--gf-gf---3",
-        "expected_result":[
+        "case_name": "Text alignment: Consecutive missing music sections",
+        "text_input": "Ave Maria {gratia} {plena dominus} tecum",
+        "vol_input": "1---fgj--jhj-hg---j--gf-ede--f----6------67---6------6---fef--gf-gf---3",
+        "expected_result": [
             ["","1---"],
             ["A-","fgj--"],
             ["ve","jhj-hg---"],
@@ -608,7 +608,7 @@
         "case_name": "Adjust spacing for unsyllabified text sections (no music)",
         "text_input": "Adiuvabit eam deus | ~Deus noster refugium",
         "vol_input": "1---lK--j--l--m---l--l---l--j---4",
-        "expected_result":[
+        "expected_result": [
             ["","1---"],
             ["Ad-","lK--"],
             ["iu-","j--"],
@@ -621,14 +621,13 @@
             ["|","3---"],
             ["~Deus noster refugium","---------------------"],
             ["","4"]
-            
         ]      
     },
     {
         "case_name": "Adjust spacing for unsyllabified text sections (short music)",
         "text_input": "Adiuvabit eam deus | ~Deus noster refugium",
         "vol_input": "1---lK--j--l--m---l--l---l--j---3---g--f---4",
-        "expected_result":[
+        "expected_result": [
             ["","1---"],
             ["Ad-","lK--"],
             ["iu-","j--"],
@@ -645,10 +644,10 @@
         ]      
     },
     {
-        "case_name":"Add empty/barline sections when number of barlines are equal",
-        "text_input":"Quanto eis {magis} plus predicabat {surdos fecit} audire et mutos loqui",
-        "vol_input":"1---g--gk---h--h7---6------6---gf---g--gh--f--f---6------6---hk--hg--gh---gF---e--fG---g--g77---4---7k--k--j--k--h--g7---3",
-        "expected_result":[
+        "case_name": "Add empty/barline sections when number of barlines are equal",
+        "text_input": "Quanto eis {magis} plus predicabat {surdos fecit} audire et mutos loqui",
+        "vol_input": "1---g--gk---h--h7---6------6---gf---g--gh--f--f---6------6---hk--hg--gh---gF---e--fG---g--g77---4---7k--k--j--k--h--g7---3",
+        "expected_result": [
             ["","1---"],
             ["Quan-","g----"],
             ["to","gk---"],
