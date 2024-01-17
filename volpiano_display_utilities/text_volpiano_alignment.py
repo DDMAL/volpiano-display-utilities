@@ -26,7 +26,7 @@ def _zip_and_align(
     volpiano: List[SyllableOrWordT],
     pad_text: SyllableOrWordT,
     pad_volpiano: SyllableOrWordT,
-) -> List[Tuple[SyllableOrWordT, SyllableOrWordT]]:
+) -> Tuple[List[Tuple[SyllableOrWordT, SyllableOrWordT]], bool]:
     """
     Aligns lists of text and volpiano together and adds padding
     if necessary. Can be used to align sections (in which case the
@@ -38,8 +38,8 @@ def _zip_and_align(
     pad_text [SyllableOrWordT]: value to fill text with if text is shorter than volpiano
     pad_volpiano [SyllableOrWordT]: value to fill volpiano with if volpiano is shorter than text
 
-    returns [list[tuple[SyllableOrWordT, SyllableOrWordT]]]: zipped list of words
-        or syllables with padding
+    returns [list[tuple[SyllableOrWordT, SyllableOrWordT]], bool]: zipped list of words
+        or syllables with padding and boolean flag indicating whether any padding was needed
     """
     len_text = len(text)
     len_volpiano = len(volpiano)
@@ -47,15 +47,19 @@ def _zip_and_align(
         logging.debug(
             "Text and volpiano have equal number of words: zipped with no padding."
         )
-        return list(zip(text, volpiano))
+        padding_needed = False
+        return list(zip(text, volpiano)), padding_needed
+    padding_needed = True
     if len_text > len_volpiano:
         logging.debug("Text longer than volpiano: padding volpiano.")
-        return list(zip_longest(text, volpiano, fillvalue=pad_volpiano))
+        return list(zip_longest(text, volpiano, fillvalue=pad_volpiano)), padding_needed
     logging.debug("Volpiano longer than text: padding text.")
-    return list(zip_longest(text, volpiano, fillvalue=pad_text))
+    return list(zip_longest(text, volpiano, fillvalue=pad_text)), padding_needed
 
 
-def _align_word(text: List[str], volpiano: List[str]) -> List[Tuple[str, str]]:
+def _align_word(
+    text: List[str], volpiano: List[str]
+) -> Tuple[List[Tuple[str, str]], bool]:
     """
     Aligns corresponding words of text and volpiano, syllable by syllable. In cases
     where the text and volpiano are not the same length, the shorter of the two
@@ -67,9 +71,12 @@ def _align_word(text: List[str], volpiano: List[str]) -> List[Tuple[str, str]]:
     text [list[str]]: list of text syllables
     volpiano [list[str]]: list of volpiano syllables
 
-    returns [list[tuple[str, str]]]: list of tuples of text and volpiano syllables
+    returns [list[tuple[str, str]], bool]: list of tuples of text and volpiano syllables
+        and a boolean indicating whether any padding was added to the word
     """
-    zipped_word = _zip_and_align(text, volpiano, pad_text="", pad_volpiano="---")
+    zipped_word, word_padded = _zip_and_align(
+        text, volpiano, pad_text="", pad_volpiano="---"
+    )
     aligned_word = []
     for text_syl, vol_syl in zipped_word[:-1]:
         vol_syl = adjust_volpiano_spacing_for_rendering(
@@ -81,13 +88,13 @@ def _align_word(text: List[str], volpiano: List[str]) -> List[Tuple[str, str]]:
         vol_syl, len(text_syl), end_of_word=True
     )
     aligned_word.append((text_syl, vol_syl))
-    return aligned_word
+    return aligned_word, word_padded
 
 
 def _align_section(
     text_section: SyllabifiedTextSection,
     volpiano_section: SyllabifiedVolpianoSection,
-) -> List[Tuple[str, str]]:
+) -> Tuple[List[Tuple[str, str]], bool]:
     """
     Aligns a section of text and volpiano. In sections of syllabified
     text, these are aligned word by word, padding (with additional words:
@@ -99,11 +106,13 @@ def _align_section(
     text_section [SyllabifiedTextSection]: section of text
     volpiano_section [SyllabifiedVolpianoSection]: section of volpiano
 
-    returns [list[tuple[str, str]]]: list of tuples of text and volpiano syllables
+    returns [list[tuple[str, str]], bool]: list of tuples of text and volpiano syllables
+        and a boolean indicating whether any part of the section was padded during alignment
     """
     logging.debug(
         "Aligning section - Text: %s. Volpiano: %s", text_section, volpiano_section
     )
+    section_misaligned_flag = False
     comb_section: List[Tuple[str, str]] = []
     # For sections of missing music, of barline indicators, or of other
     # areas with unsyllabified texts (e.g., incipits) the text
@@ -136,12 +145,14 @@ def _align_section(
         # In sections of syllabified text, align text and volpiano
         # word by word.
         logging.debug("Aligning words in section with syllabified text.")
-        aligned_words = _zip_and_align(
+        aligned_words, section_padded_flag = _zip_and_align(
             text_section.section,
             volpiano_section.section,
             pad_text=[""],
             pad_volpiano=["----"],
         )
+        if section_padded_flag:
+            section_misaligned_flag = True
         logging.debug("Aligned words: %s", aligned_words)
         for txt_word, vol_word in aligned_words:
             # Align each word of text and volpiano in the section
@@ -149,11 +160,16 @@ def _align_section(
             logging.debug(
                 "Aligning syllables in word. Text: %s. Volpiano: %s", txt_word, vol_word
             )
-            comb_wrd = _align_word(txt_word, vol_word)
+            comb_wrd, word_padded_flag = _align_word(txt_word, vol_word)
             logging.debug("Aligned syllables: %s", comb_wrd)
             comb_section.extend(comb_wrd)
+            # Sections with a missing word indicator ("#") will require
+            # some padding, but this is the one case where padding would
+            # not indicate a misencoding.
+            if word_padded_flag and txt_word != ["#"]:
+                section_misaligned_flag = True
     logging.debug("Aligned section: %s", comb_section)
-    return comb_section
+    return comb_section, section_misaligned_flag
 
 
 def _insert_text_barline(
@@ -297,43 +313,61 @@ def _infer_barlines(
 
 
 def align_text_and_volpiano(
-    chant_text: str, volpiano: str, clean_text: bool, text_presyllabified: bool = False
-) -> List[Tuple[str, str]]:
+    chant_text: str, volpiano: str, text_presyllabified: bool = False
+) -> Tuple[List[Tuple[str, str]], bool]:
     """
     Aligns syllabified text with volpiano, performing periodic sanity checks
     and accounting for misalignments.
 
     chant_text [str]: the text of a chant
     volpiano [str]: the volpiano for a chant
-    clean_text [bool]: whether to clean the text before syllabifying. Passed to
-        syllabify_text (see that functions documentation for more details). Defaults
-        to False.
     text_presyllabified [bool]: whether the text is already syllabified. Passed
         to syllabify_text (see that functions documentation for more details). Defaults
         to False.
 
-    returns [list[tuple[str, str]]]: list of tuples of text syllables and volpiano syllables
-        as (text_str, volpiano_str)
+    returns [list[tuple[str, str]], bool]: list of tuples of text syllables and volpiano syllables
+        as (text_str, volpiano_str) and a boolean indicating whether or not the encoding should
+        be reviewed (if True is returned, the encoding should be reviewed for errors). The function
+        attempts to align even in cases with encoding errors, so a provisional alignment will often
+        be returned, even in cases where the review boolean is True.
     """
-    syllabified_text = syllabify_text(
-        chant_text, clean_text=clean_text, text_presyllabified=text_presyllabified
+    review_encoding_flag: bool = False
+    # If cleaning of text is required, we set the review_encoding_flag to True
+    try:
+        syllabified_text = syllabify_text(
+            chant_text, clean_text=False, text_presyllabified=text_presyllabified
+        )
+    except ValueError:
+        syllabified_text = syllabify_text(
+            chant_text, clean_text=True, text_presyllabified=text_presyllabified
+        )
+        review_encoding_flag = True
+    preprocessed_volpiano, vol_chars_rmvd_flag = prepare_volpiano_for_syllabification(
+        volpiano
     )
-    preprocessed_volpiano = prepare_volpiano_for_syllabification(volpiano)
+    if vol_chars_rmvd_flag:
+        review_encoding_flag = True
     # If volpiano ends with a proper barline ("3" or "4"), remove it from the string
     # before syllabification and save it for later. If it does not, syllabify
     # the volpiano string as is, but add a proper barline (default "3") to the
-    # final alignment.
+    # final alignment. Set the review_encoding_flag to True where appropriate.
     fin_bar = preprocessed_volpiano[-1]
     if fin_bar not in "34":
         fin_bar = "3"
+        review_encoding_flag = True
     else:
         preprocessed_volpiano = preprocessed_volpiano[:-1]
-    syllabified_volpiano = syllabify_volpiano(preprocessed_volpiano)
+    syllabified_volpiano, improper_vol_when_syllabified = syllabify_volpiano(
+        preprocessed_volpiano
+    )
+    if improper_vol_when_syllabified:
+        review_encoding_flag = True
     # Add the opening clef with no text
     aligned_text_and_vol_syls: List[Tuple[str, str]] = [("", "1---")]
     # If the number of sections in the text and volpiano do not match,
     # we need to infer section breaks in the shorter of the strings
-    # in order to align them.
+    # in order to align them. If barline inference is necessary,
+    # set the review_encoding_flag to True.
     if len(syllabified_text) != len(syllabified_volpiano):
         logging.debug(
             "Text and volpiano have different numbers of sections. Inferring barlines."
@@ -341,11 +375,14 @@ def align_text_and_volpiano(
         syllabified_text, syllabified_volpiano = _infer_barlines(
             syllabified_text, syllabified_volpiano
         )
+        review_encoding_flag = True
     # For each interior section, align the section
     for vol_sec, txt_sec in zip(syllabified_volpiano, syllabified_text):
-        aligned_section: List[Tuple[str, str]] = _align_section(txt_sec, vol_sec)
+        aligned_section, section_misaligned_flag = _align_section(txt_sec, vol_sec)
         aligned_text_and_vol_syls.extend(aligned_section)
+        if section_misaligned_flag:
+            review_encoding_flag = True
     # Add the final barline with no text
     aligned_text_and_vol_syls.append(("", fin_bar))
     logging.debug("Combined text and volpiano: %s", aligned_text_and_vol_syls)
-    return aligned_text_and_vol_syls
+    return aligned_text_and_vol_syls, review_encoding_flag

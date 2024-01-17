@@ -3,6 +3,27 @@
         "case_name": "Test alignment: no special characters",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "review_encoding_flag": false,
+        "expected_result": [
+            [ "", "1---" ],
+            [ "in", "f---" ],
+            [ "di-", "df--" ],
+            [ "e-", "f--" ],
+            [ "bus", "f---" ],
+            [ "e-", "f--" ],
+            [ "ius", "efgfe---" ],
+            [ "ob-", "g--" ],
+            [ "ses-", "hg-hgf--" ],
+            [ "sa", "ef-gef---" ],
+            [ "est", "ed---" ],
+            [ "", "4" ]
+        ]
+    },
+    {
+        "case_name": "Test alignment: improper text characters",
+        "text_input": "in diebus eius @%) obsessa est",
+        "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "review_encoding_flag": true, 
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -22,6 +43,7 @@
         "case_name": "Test alignment: no special characters, long syllables",
         "text_input": "in spargere fractum",
         "vol_input": "1---f---f--f--f---f--f---4",
+        "review_encoding_flag": false,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -37,6 +59,8 @@
         "case_name": "Test alignment: internal bar lines",
         "text_input": "in diebus |eius | obsessa est",
         "vol_input": "1---f---df--f--f---3---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
+        "_comment": "Improper spacing after second volpiano barline",
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -58,6 +82,7 @@
         "case_name": "Test alignment: missing final barline",
         "text_input": "in diebus",
         "vol_input": "1---f---df--f--f--",
+        "review_encoding_flag": true,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -71,6 +96,7 @@
         "case_name": "Test alignment: improper spacing with final barline",
         "text_input": "in diebus",
         "vol_input": "1---f---df--f--f--3",
+        "review_encoding_flag": true,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -84,6 +110,7 @@
         "case_name": "Test alignment: missing music",
         "text_input": "in {diebus add char} e- {ius} obsessa est",
         "vol_input": "1---f---6------6---f---6------6---g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": false,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -101,6 +128,8 @@
         "case_name": "Test alignment: missing music followed by line breaks (CDB Chant 229133)",
         "text_input": "{Domini est terra et} plenitudo e {ius orbis terrarum et uni} versi qui habitant {in eo}",
         "vol_input": "1---6------67---ghg--h--hkhg--hf-gh-kjh-jkjh---ghkhgh---6------67---kjhg--hghg-gF--gf---fd---efe--f--fh---6------67---4",
+        "review_encoding_flag": true,
+        "_comment": "Volpiano requires padding at word 'versi'",
         "expected_result": [
             ["", "1---"],
             ["{Domini est terra et}", "6---------------------67---"],
@@ -125,6 +154,7 @@
         "case_name": "Test alignment: Missing music encoded with too few internal hyphens",
         "text_input": "in {diebus} e- {ius} obsessa est",
         "vol_input": "1---f---6--6---f---6----6---g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -142,6 +172,7 @@
         "case_name": "Test alignment: Missing music encoded with too many internal hyphens",
         "text_input": "in {diebus} e- {ius} obsessa est",
         "vol_input": "1---f---6-------6---f---6-----------6---g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -159,6 +190,7 @@
         "case_name": "Test alignment: missing words",
         "text_input": "in # eius obsess- #",
         "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf---ef--gef--ed---3",
+        "review_encoding_flag": false,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -179,6 +211,7 @@
         "case_name": "Test alignment: missing words and music",
         "text_input": "in {#} eius obsess- {#}",
         "vol_input": "1---f---6------6---f--efgfe---g--hg-hgf---6------6---3",
+        "review_encoding_flag": false,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -195,6 +228,7 @@
         "case_name": "Test alignment: overflow text",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "1---f---df--f-f---f---g--hg--hg---4",
+        "review_encoding_flag": true,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -214,6 +248,7 @@
         "case_name": "Test alignment: overflow volpiano",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "1---f---df--f--f--f---f--efgfe---g--hg-hgf--ef-gef--hj-hj---ed---gh---4",
+        "review_encoding_flag": true,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -236,6 +271,7 @@
         "case_name": "Test alignment: text with incipit",
         "text_input": "in diebus | ~eius | obsessa | ~est",
         "vol_input": "1---f---df--f--f---3---f--efgfe---3---g--hg-hgf--ef-gef---4---ed---4",
+        "review_encoding_flag": false,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -257,6 +293,7 @@
         "case_name": "Test alignment: text with ipsum",
         "text_input": "in diebus eius | ~Ipsum [obsessa est]",
         "vol_input": "1---f---df--f--f---f--efgfe---4---g--hg--hgf--ef--gef--ed---4",
+        "review_encoding_flag": false,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -274,6 +311,8 @@
         "case_name": "Expected version for dropped words in middle of section",
         "text_input": "in diebus eius | obsessa est",
         "vol_input": "1---f---df--f--f---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
+        "_comment": "Improper spacing after first volpiano barline",
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -294,6 +333,7 @@
         "case_name": "Test alignment: dropped text word in middle of section",
         "text_input": "in eius | obsessa est",
         "vol_input": "1---f---df--f--f---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -314,6 +354,7 @@
         "case_name": "Test alignment: dropped volpiano word in middle of section",
         "text_input": "in diebus eius | obsessa est",
         "vol_input": "1---f---f--efgfe---4g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
         "expected_result": [
             [ "", "1---" ],
             [ "in", "f---" ],
@@ -334,6 +375,7 @@
         "case_name": "Test alignment: improper clef, preceding characters ",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "-j---1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "review_encoding_flag": true,
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -353,6 +395,7 @@
         "case_name": "Test alignment: improper clef, improper spacing",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "1--f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---4",
+        "review_encoding_flag": true,
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -372,6 +415,7 @@
         "case_name": "Test alignment: improper clef, extra clef",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "1--f---df--f--f---f--efgfe---g--1---hg-hgf--ef-gef---ed---4",
+        "review_encoding_flag": true,
         "expected_result": [
             ["", "1---"],
             ["in", "f---"],
@@ -393,6 +437,8 @@
         "case_name": "Test alignment: line breaks",
         "text_input": "Gabriel | angelus apparuit | Zachariae dicens",
         "vol_input": "1---c--cg7--g---47---g--gf-fef--fe---e--gh--kh-jkjhgh--hg---4--7-c--ded-ef--e--eged-efed---cdedcd--dc---3",
+        "review_encoding_flag": true,
+        "_comment": "Line break should immediately follow barline at second volpiano barline",
         "expected_result": [
             ["", "1---"],
             ["Ga-","c--"],
@@ -420,6 +466,8 @@
         "case_name": "Test alignment: page breaks",
         "text_input": "Gabriel | angelus apparuit | Zachariae dicens",
         "vol_input": "1---c--cg77--g---477---g--gf-fef--fe---e--gh--kh-jkjhgh--hg---4--77-c--ded-ef--e--eged-efed---cdedcd--dc---3",
+        "review_encoding_flag": true,
+        "_comment": "Page break should immediately follow barline at second volpiano barline",
         "expected_result": [
             ["", "1---"],
             ["Ga-","c--"],
@@ -447,6 +495,8 @@
         "case_name": "Test alignment: column breaks",
         "text_input": "Gabriel | angelus apparuit | Zachariae dicens",
         "vol_input": "1---c--cg777--g---4777---g--gf-fef--fe---e--gh--kh-jkjhgh--hg---4--777-c--ded-ef--e--eged-efed---cdedcd--dc---3",
+        "review_encoding_flag": true,
+        "_comment": "Column break should immediately follow barline at second volpiano barline",
         "expected_result": [
             ["", "1---"],
             ["Ga-","c--"],
@@ -474,7 +524,8 @@
         "case_name": "Test alignment: Volpiano missing section barlines",
         "text_input": "in diebus | eius | obsessa est",
         "vol_input": "1---f---df--f--f---f--efgfe---g--hg-hgf--ef-gef---ed---3",
-        "expected_result": [
+        "review_encoding_flag": true,
+        "expected_result":  [
             ["","1---"],
             ["in","f---"],
             ["di-","df--"],
@@ -495,6 +546,7 @@
         "case_name": "Test alignment: Text missing section barlines",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "1---f---df--f--f---4---f--efgfe---4---g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
         "expected_result": [
             ["","1---"],
             ["in","f---"],
@@ -516,6 +568,7 @@
         "case_name": "Test alignment: Volpiano missing section barlines with syllable mismatch",
         "text_input": "in diebus | eius | obsessa est",
         "vol_input": "1---f--df--f--f---f-efgfe---g--hg-hgf--efgef---ed---3",
+        "review_encoding_flag": true,
         "expected_result": [
             ["","1---"],
             ["in","f--"],
@@ -541,6 +594,7 @@
         "case_name": "Test alignment: Text missing section barlines with syllable mismatch",
         "text_input": "in diebus eius obsessa est",
         "vol_input": "1---f--df--f--f--4---f-efgfe---4---g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": true,
         "expected_result": [
             ["","1---"],
             ["in","f--"],
@@ -566,6 +620,7 @@
         "case_name": "Test alignment: Too many hyphens after words",
         "text_input": "Ave Maria gratia plena dominus tecum",
         "vol_input": "1---fgj--jhj-hg---j--gf-ede--f----kh--j--gj---fg--g---fh--jh-gh--g------fef--gf-gf---3",
+        "review_encoding_flag": true,
         "expected_result": [
             ["","1---"],
             ["A-","fgj--"],
@@ -589,14 +644,15 @@
     {
         "case_name": "Text alignment: Consecutive missing music sections",
         "text_input": "Ave Maria {gratia} {plena dominus} tecum",
-        "vol_input": "1---fgj--jhj-hg---j--gf-ede--f----6------67---6------6---fef--gf-gf---3",
+        "vol_input": "1---fgj--jhj-hg---j--gf-ede--f---6------67---6------6---fef--gf-gf---3",
+        "review_encoding_flag": false,
         "expected_result": [
             ["","1---"],
             ["A-","fgj--"],
             ["ve","jhj-hg---"],
             ["Ma-","j--"],
             ["ri-","gf-ede--"],
-            ["a","f----"],
+            ["a","f---"],
             ["{gratia}","6------67---"],
             ["{plena dominus}","6---------------6---"],
             ["te-","fef--"],

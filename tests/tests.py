@@ -265,25 +265,35 @@ class TestVolpianoSyllabification(unittest.TestCase):
     """
 
     def test_prepare_volpiano_for_alignment(self):
-        with self.subTest("Remove starting material"):
-            standard_volpiano = "1---g---h---3"
-            volpiano_with_extra_starting_matter = "tf-g-1---g-1--h---3"
-            expected = "g---h---3"
-            self.assertEqual(
-                prepare_volpiano_for_syllabification(standard_volpiano), expected
+        standard_volpiano = "1---g---h---3"
+        volpiano_with_extra_starting_matter = "tf-g-1---g-1--h---3"
+        expected = "g---h---3"
+        with self.subTest("Standard starting material"):
+            (
+                prepared_volpiano,
+                vol_chars_rmvd_flag,
+            ) = prepare_volpiano_for_syllabification(standard_volpiano)
+            self.assertEqual(prepared_volpiano, expected)
+            self.assertFalse(vol_chars_rmvd_flag)
+        with self.subTest("Extra starting material"):
+            (
+                prepared_volpiano,
+                vol_chars_rmvd_flag,
+            ) = prepare_volpiano_for_syllabification(
+                volpiano_with_extra_starting_matter
             )
             self.assertEqual(
-                prepare_volpiano_for_syllabification(
-                    volpiano_with_extra_starting_matter
-                ),
+                prepared_volpiano,
                 expected,
             )
+            self.assertTrue(vol_chars_rmvd_flag)
 
     def test_syllabify_volpiano(self):
         volpiano_syllabification_test_cases = [
             {
                 "case_name": "Section divided by barline '3' + standard spacing",
                 "volpiano": "a-b--c---d---e---3---",
+                "vol_improperly_encoded": False,
                 "expected_result": [
                     [["a-b--", "c---"], ["d---"], ["e---"]],
                     [["3---"]],
@@ -292,6 +302,7 @@ class TestVolpianoSyllabification(unittest.TestCase):
             {
                 "case_name": "Section divided by barline '4' + standard spacing",
                 "volpiano": "a-b--c---d---e---4---",
+                "vol_improperly_encoded": False,
                 "expected_result": [
                     [["a-b--", "c---"], ["d---"], ["e---"]],
                     [["4---"]],
@@ -300,11 +311,13 @@ class TestVolpianoSyllabification(unittest.TestCase):
             {
                 "case_name": "Section divided by barline '3' + non-standard spacing",
                 "volpiano": "a-b--c---d---e-3--",
+                "vol_improperly_encoded": True,  # There should be 3 hyphens both before and after barline
                 "expected_result": [[["a-b--", "c---"], ["d---"], ["e-"]], [["3--"]]],
             },
             {
                 "case_name": "Section divided by barline '4' + break encoded",
                 "volpiano": "a-b--c---d---e---47---",
+                "vol_improperly_encoded": False,
                 "expected_result": [
                     [["a-b--", "c---"], ["d---"], ["e---"]],
                     [["47---"]],
@@ -313,23 +326,30 @@ class TestVolpianoSyllabification(unittest.TestCase):
             {
                 "case_name": "Missing music section",
                 "volpiano": "a-b--c---6------6---",
+                "vol_improperly_encoded": False,
                 "expected_result": [[["a-b--", "c---"]], [["6------6---"]]],
             },
             {
                 "case_name": "Missing music section with break encoded",
                 "volpiano": "a-b--c---6------6---77",
+                "vol_improperly_encoded": True,  # Section break marks should immediately follow "6"
                 "expected_result": [[["a-b--", "c---"]], [["6------6---77"]]],
             },
         ]
         for test_case in volpiano_syllabification_test_cases:
             with self.subTest(test_case["case_name"]):
-                syllabified_volpiano = syllabify_volpiano(test_case["volpiano"])
+                syllabified_volpiano, vol_improperly_encoded = syllabify_volpiano(
+                    test_case["volpiano"]
+                )
                 syllabified_volpiano_list = [
                     section.section for section in syllabified_volpiano
                 ]
                 self.assertEqual(
                     syllabified_volpiano_list,
                     test_case["expected_result"],
+                )
+                self.assertEqual(
+                    vol_improperly_encoded, test_case["vol_improperly_encoded"]
                 )
 
     def test_adjust_missing_music_spacing_for_rendering(self):
@@ -392,7 +412,10 @@ class TestTextVolpianoAlignment(unittest.TestCase):
             test_case["expected_result"] = tupled_case
         for test_case in test_cases:
             with self.subTest(test_case["case_name"]):
-                result = align_text_and_volpiano(
-                    test_case["text_input"], test_case["vol_input"], clean_text=True
+                result, review_encoding_flag = align_text_and_volpiano(
+                    test_case["text_input"], test_case["vol_input"]
                 )
                 self.assertEqual(result, test_case["expected_result"])
+                self.assertEqual(
+                    review_encoding_flag, test_case["review_encoding_flag"]
+                )
