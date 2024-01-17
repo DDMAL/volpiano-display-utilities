@@ -664,6 +664,7 @@
         "case_name": "Adjust spacing for unsyllabified text sections (no music)",
         "text_input": "Adiuvabit eam deus | ~Deus noster refugium",
         "vol_input": "1---lK--j--l--m---l--l---l--j---4",
+        "review_encoding_flag": true,
         "expected_result": [
             ["","1---"],
             ["Ad-","lK--"],
@@ -683,6 +684,7 @@
         "case_name": "Adjust spacing for unsyllabified text sections (short music)",
         "text_input": "Adiuvabit eam deus | ~Deus noster refugium",
         "vol_input": "1---lK--j--l--m---l--l---l--j---3---g--f---4",
+        "review_encoding_flag": false,
         "expected_result": [
             ["","1---"],
             ["Ad-","lK--"],
@@ -703,6 +705,7 @@
         "case_name": "Add empty/barline sections when number of barlines are equal",
         "text_input": "Quanto eis {magis} plus predicabat {surdos fecit} audire et mutos loqui",
         "vol_input": "1---g--gk---h--h7---6------6---gf---g--gh--f--f---6------6---hk--hg--gh---gF---e--fG---g--g77---4---7k--k--j--k--h--g7---3",
+        "review_encoding_flag": true,
         "expected_result": [
             ["","1---"],
             ["Quan-","g----"],
