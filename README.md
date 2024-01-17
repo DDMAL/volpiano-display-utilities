@@ -87,7 +87,7 @@ Text and volpiano are first aligned section by section and then word by word in 
 
 The alignment algorithm also adapts the size of missing music sections in the volpiano to the amount of text associated with the missing music. Sections of missing music are always encoded "6------6" in volpiano, regardless of how long the missing section is. For the purposes of browser display, the module may add additional space (ie. add hyphens between the "6"s) to this section to account for text. 
 
-The `align_text_and_volpiano` function accepts a chant's text and volpiano-encoded melody as strings and returns the aligned text and melody. The function returns a list of 2-tuples of strings of the form `(text_string, volpiano_string)`.
+The `align_text_and_volpiano` function accepts a chant's text and volpiano-encoded melody as strings and returns the aligned text and melody. The function returns a list of 2-tuples of strings of the form `(text_string, volpiano_string)` and a boolean that flags whether or not the alignment process encountered any errors in the encodings. This boolean is meant to identify cases where manual correction might be called for while still returning a passable alignment for immediate use.
 
 ```python
 >>> from text_volpiano_alignment import align_text_and_volpiano
@@ -97,7 +97,6 @@ The `align_text_and_volpiano` function accepts a chant's text and volpiano-encod
 
 The `align_text_and_volpiano` function also takes the following optional arguments:
   - `text_presyllabified`: A boolean indicating whether the text passed to the function has already been syllabified (with hyphens marking syllable boundaries). Defaults to `False`.
-  - `clean_text`: A boolean passed to the text syllabification tool indicating whether text should be stripped of invalid characters before syllabification. Defaults to `False`.
 
 
 ### Word Syllabification
