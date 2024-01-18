@@ -111,10 +111,11 @@ def syllabify_volpiano(volpiano: str) -> Tuple[List[SyllabifiedVolpianoSection],
             vol_syls = VOLPIANO_SYLLABLE_REGEX.findall(vol_word)
             # Check if the last syllable of the word is improperly spaced
             # with three and only three trailing hyphens.
-            final_syl_of_word = vol_syls[-1]
-            if final_syl_of_word[-3:] != "---" or len(final_syl_of_word) < 4:
-                volpiano_improperly_spaced = True
-            elif vol_syls[-1][-4] == "-":
+            try:
+                final_syl_of_word = vol_syls[-1]
+                if final_syl_of_word[-3:] != "---" or final_syl_of_word[-4] == "-":
+                    volpiano_improperly_spaced = True
+            except IndexError:
                 volpiano_improperly_spaced = True
             syllabified_words.append(vol_syls)
         syllabified_volpiano.append(SyllabifiedVolpianoSection(syllabified_words))
