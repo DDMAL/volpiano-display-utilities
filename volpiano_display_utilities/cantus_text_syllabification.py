@@ -18,10 +18,17 @@ from .latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
 from .syllabified_section import SyllabifiedTextSection
 
 EXCEPTIONS_DICT = {
-    "euouae": ["e-", "u-", "o-", "u-", "a-", "e"],
-    "israelitis": ["is-", "ra-", "e-", "li-", "tis"],
-    "israel": ["is-", "ra-", "el"],
-    "michael": ["mi-", "cha-", "el"],
+    # Exceptions to usual word syllabification
+    # Values are syllable boundaries (eg. a syllable
+    # boundary should exist before the indicated
+    # string index in the word)
+    # Example: "mihi" has a syllable boundary before
+    # the "h" (index 2), so we would have
+    # "mihi":[2]
+    "euouae": [1, 2, 3, 4, 5],
+    "israelitis": [2, 4, 5, 7],
+    "israel": [2, 4],
+    "michael": [2, 5],
 }
 
 # INVALID_CHAR_REGEX matches any character not valid in Cantus DB entries
@@ -59,9 +66,8 @@ def _detect_invalid_characters(text: str) -> bool:
 def _prepare_string_for_syllabification(word_str: str) -> Tuple[str, bool, bool]:
     """
     Complete preparation of a string before syllabification.
-    All letters are converted to lowercase. Hyphens are removed
-    from the beginning and end of the string, and the presence
-    of these hyphens is recorded.
+    Hyphens are removed from the beginning and end of the string,
+    and the presence of these hyphens is recorded.
 
     word_str [str]: string to prepare
 
@@ -151,8 +157,11 @@ def syllabify_text(
                 syllabified_section.append([word])
                 logging.debug("Word not syllabified: %s", word)
             # If the word is an exception, syllabify as specified
-            elif word in EXCEPTIONS_DICT:
-                syllabified_section.append(EXCEPTIONS_DICT[word])
+            elif word.lower() in EXCEPTIONS_DICT:
+                exception_syllabification = split_word_by_syl_bounds(
+                    word, EXCEPTIONS_DICT[word.lower()]
+                )
+                syllabified_section.append(exception_syllabification)
                 logging.debug(
                     "Cantus Database syllabification exception found: %s", word
                 )

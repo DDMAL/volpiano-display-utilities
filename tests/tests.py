@@ -14,6 +14,7 @@ from volpiano_display_utilities.cantus_text_syllabification import (
     _prepare_string_for_syllabification,
     _split_text_sections,
     syllabify_text,
+    flatten_syllabified_text,
 )
 from volpiano_display_utilities.volpiano_syllabification import (
     prepare_volpiano_for_syllabification,
@@ -70,6 +71,18 @@ class TestCantusTextSyllabification(unittest.TestCase):
     """
     Tests functions in cantus_text_syllabification.
     """
+
+    def test_cantus_exceptions(self):
+        """Tests syllabification of a few words that are exceptions
+        in the Cantus Database."""
+        exception_word = "euouae"
+        syllabified_word = flatten_syllabified_text(syllabify_text(exception_word))
+        self.assertEqual(syllabified_word, "e-u-o-u-a-e")
+        exception_word_capitalized = "Euouae"
+        syllabified_word_capitalized = flatten_syllabified_text(
+            syllabify_text(exception_word_capitalized)
+        )
+        self.assertEqual(syllabified_word_capitalized, "E-u-o-u-a-e")
 
     def test_clean_text(self):
         """Tests _clean_text."""
