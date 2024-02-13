@@ -203,9 +203,11 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
           in which case we split as [vowel] + [i + vowel]
     2. 1 consonant between vowel groups: keep the syllable boundary
           where it is (consonant is part of second syllable)
-    3. 2 consonants between vowel groups: split the first consonant to  the
+    3. 2 consonants between vowel groups: split the first consonant to the
           first syllable, unless the two consonants form a consonant group, in
-          which case keep the group on the second syllable
+          which case keep the group on the second syllable. EXCEPTION:
+          the consonant group "nc" is only a group in sequences of three or more
+          consonants, so "nc" is split as "n-c" in this case.
     4. 3+ consonants between vowel groups: add the first consonant or
           consonant group to the first syllable
 
@@ -235,7 +237,7 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
     elif num_ltrs_btw_vow_grps == 1:
         split_case = "1 consonant between vowels"
     elif num_ltrs_btw_vow_grps == 2:
-        if ltrs_btw_vow_grps not in _CONSONANT_GROUPS:
+        if ltrs_btw_vow_grps not in _CONSONANT_GROUPS or ltrs_btw_vow_grps == "nc":
             syl_bound = 1
             split_case = "2 consonants between vowels"
         else:
