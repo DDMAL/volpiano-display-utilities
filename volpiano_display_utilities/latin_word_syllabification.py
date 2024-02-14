@@ -51,6 +51,7 @@ _CONSONANT_GROUPS: set = {
     "fr",
     "gl",
     "gr",
+    "st",
 }
 
 # Prefix groups are groups of characters that serve as common prefixes. For details,
