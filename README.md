@@ -141,12 +141,12 @@ flowchart TD
             direction LR
             H1[Consonant added before second vowel] ~~~ H2["'X' added after first vowel"]
         end
-        subgraph c2 [Two consonants between vowels]
+        subgraph c2 [Two consonants between vowels (5)]
             direction LR
             H3["Consonants are consonant cluster (4)"] -->|Yes| H4[Cluster added before second vowel]
             H3 -->|No| H5[First consonant added after first vowel, \n second consonant added before second vowel]
         end
-        subgraph c3 [Three-plus consonants between vowels]
+        subgraph c3 [Three-plus consonants between vowels (5)]
             direction LR
            H6["First two consonants are consonant cluster"] -->|Yes| H7[Cluster added after first vowel, \n remaining consosnants added before second vowel]
             H6 -->|No| H8[First consonant added after first vowel, \n remaining consonants added before second vowel]
@@ -183,11 +183,12 @@ flowchart TD
     - "ch", "ph", "th", and "rh"
     - "gn"
     - "qu" and "gu" (when "u" serving as semivowel)
-    - "nc"
-    - "mp"
-    - "sc"
+    - "sc" and "st"
     - "p", "b", "t", "d", "c", "f", or "g" + "l"
     - "p", "b", "t", "d", "c", "f", or "g" + "r"
+    - "str"
+
+*Note (5)*: Nasalized consonants ("m" and "n") "attach" to the previous vowel when they begin sequences of two or more consonants. The remaining consonants are then treated as if they were the only consonants between vowels. For example, if the three-consonant sequence "mpr" occurs between two vowel groups, the "m" attaches to the preceding vowel group, and the remaining consonants "pr" are treated according by the logic of a two-consonant sequence between vowel groups. 
 
 Certain exceptions to these general rules will occur. The module provides a means of overriding the default syllabification for a specific word in `cantus_text_syllabification.py`. Exceptions can be added to the `EXCEPTIONS_DICT` dictionary.
 
