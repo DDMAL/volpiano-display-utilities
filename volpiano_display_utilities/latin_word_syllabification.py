@@ -237,7 +237,7 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
         and split_case is a string describing the case used to determine the
         syllable boundary (passed to logger).
     """
-    num_ltrs_btw_vow_grps = len(ltrs_btw_vow_grps)
+    num_ltrs_btw_vow_grps: int = len(ltrs_btw_vow_grps)
     # Default case: syllable boundary immediately follows previous
     # vowel group.
     if num_ltrs_btw_vow_grps == 0:
@@ -249,36 +249,33 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
     # If the first letter of the consonant sequence is a nasalized consonant,
     # we add it to the prior syllable and treat the remaining consonants
     # as if they were the only consonants between the vowel groups.
+    num_consonants = num_ltrs_btw_vow_grps
     if ltrs_btw_vow_grps[0] in _NASALIZED_CONSONANTS:
         syl_bound = 1
         ltrs_btw_vow_grps = ltrs_btw_vow_grps[1:]
         num_ltrs_btw_vow_grps -= 1
-        split_case_nasal_cons_tag = " (first consonant nasaslized)"
-        num_consonants = num_ltrs_btw_vow_grps + 1
         # If there is only one consonant remaining, we treat it as the only
         # consonant between the vowel groups and add it to the following syllable.
         if num_ltrs_btw_vow_grps == 1:
-            return syl_bound, "2 consonants between vowels" + split_case_nasal_cons_tag
+            return syl_bound, "2 consonants between vowels"
     else:
-        num_consonants = num_ltrs_btw_vow_grps
         syl_bound = 0
-        split_case_nasal_cons_tag = ""
     if num_ltrs_btw_vow_grps == 2:
         if ltrs_btw_vow_grps not in _CONSONANT_GROUPS:
             syl_bound += 1
-            split_case = f"{num_consonants} consonants between vowels{split_case_nasal_cons_tag}"
+            split_case = f"{num_consonants} consonants between vowels"
         else:
-            split_case = f"{num_consonants} consonants (consonant group) between vowels{split_case_nasal_cons_tag}"
+            split_case = f"{num_consonants} consonants (consonant group) between vowels"
     elif ltrs_btw_vow_grps == "str":
-        split_case = f"{num_consonants} consonants ('str' group) between vowels{split_case_nasal_cons_tag}"
+        split_case = f"{num_consonants} consonants ('str' group) between vowels"
     elif ltrs_btw_vow_grps[1:] in _CONSONANT_GROUPS:
         syl_bound += 1
-        split_case = f"{num_consonants} consonants (consonant group) between vowels{split_case_nasal_cons_tag}"
+        split_case = f"{num_consonants} consonants (consonant group) between vowels"
     elif ltrs_btw_vow_grps[:2] in _CONSONANT_GROUPS:
-        split_case = f"{num_consonants} consonants (consonant group) between vowels{split_case_nasal_cons_tag}"
+        split_case = f"{num_consonants} consonants (consonant group) between vowels"
     else:
         syl_bound += 1
-        split_case = f"{num_consonants} consonants between vowels{split_case_nasal_cons_tag}"
+        split_case = f"{num_consonants} consonants between vowels"
     return syl_bound, split_case
 
 
