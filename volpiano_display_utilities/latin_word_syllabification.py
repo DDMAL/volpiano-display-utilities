@@ -36,8 +36,6 @@ _CONSONANT_GROUPS: set = {
     "gn",
     "qu",
     "gu",
-    "nc",
-    "mp",
     "sc",
     "pl",
     "pr",
@@ -53,6 +51,9 @@ _CONSONANT_GROUPS: set = {
     "gr",
     "st",
 }
+
+
+_NASALIZED_CONSONANTS: set = {"m", "n"}
 
 # Prefix groups are groups of characters that serve as common prefixes. For details,
 # see README.
@@ -206,11 +207,21 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
           where it is (consonant is part of second syllable)
     3. 2 consonants between vowel groups: split the first consonant to the
           first syllable, unless the two consonants form a consonant group, in
-          which case keep the group on the second syllable. EXCEPTION:
-          the consonant group "nc" is only a group in sequences of three or more
-          consonants, so "nc" is split as "n-c" in this case.
-    4. 3+ consonants between vowel groups: add the first consonant or
-          consonant group to the first syllable
+          which case keep the group on the second syllable.
+    4. 3+ consonants between vowel groups: group the final two consonants of
+          a 3-consonant sequence between vowel groups, if possible, and place preceding
+          consonants in the preceding syllable. If these cannot be grouped or there
+          are more than three consonants between vowel groups, group the
+          first two consonants, if possible, and add following consonants to the
+          following syllable. If neither the final two nor first two consonants can
+          be grouped, split the syllable after the first consonant.
+
+    EXCEPTION: If the first consonant of a sequence of 2 or more consonants between
+    vowels is a nasalized consonant ("m" or "n"), we don't treat it as a consonant
+    for the purposes of the cases above. In practice, this means we only need to check
+    for the existence of a nasalized consonant at the start of a sequence of 3 or more
+    consonants between vowels (in the two consonant case, an initial "m" or "n" in the
+    sequence is already added to the preceding syllable).
 
     Two additional special cases exist. "X" is treated as a double consonant
     "ks" and the letter terminates the previous syllable. In cases where "i"
@@ -229,33 +240,45 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
     num_ltrs_btw_vow_grps = len(ltrs_btw_vow_grps)
     # Default case: syllable boundary immediately follows previous
     # vowel group.
-    syl_bound = 0
     if num_ltrs_btw_vow_grps == 0:
-        split_case = "Hiatus"
-    elif ltrs_btw_vow_grps[0] == "x":
+        return 0, "Hiatus"
+    if ltrs_btw_vow_grps[0] == "x":
+        return 1, "X is double consonant"
+    if num_ltrs_btw_vow_grps == 1:
+        return 0, "1 consonant between vowels"
+    # If the first letter of the consonant sequence is a nasalized consonant,
+    # we add it to the prior syllable and treat the remaining consonants
+    # as if they were the only consonants between the vowel groups.
+    if ltrs_btw_vow_grps[0] in _NASALIZED_CONSONANTS:
         syl_bound = 1
-        split_case = "X is double consonant"
-    elif num_ltrs_btw_vow_grps == 1:
-        split_case = "1 consonant between vowels"
-    elif num_ltrs_btw_vow_grps == 2:
-        if ltrs_btw_vow_grps not in _CONSONANT_GROUPS or ltrs_btw_vow_grps == "nc":
-            syl_bound = 1
-            split_case = "2 consonants between vowels"
-        else:
-            split_case = "2 consonants between vowels (consonant group)"
+        ltrs_btw_vow_grps = ltrs_btw_vow_grps[1:]
+        num_ltrs_btw_vow_grps -= 1
+        split_case_nasal_cons_tag = " (first consonant nasaslized)"
+        num_consonants = num_ltrs_btw_vow_grps + 1
+        # If there is only one consonant remaining, we treat it as the only
+        # consonant between the vowel groups and add it to the following syllable.
+        if num_ltrs_btw_vow_grps == 1:
+            return syl_bound, "2 consonants between vowels" + split_case_nasal_cons_tag
     else:
-        # in situations where 3 or more consonants are between consecutive vowels,
-        # group the final two consonants, if possible (amplius -> am-pl-ius). If not,
-        # group the first two consonants (coniunctos -> con-iunc-tos), if possible. If
-        # neither the final two nor first two consonants can be grouped, split after
-        # the first consonant.
-        if ltrs_btw_vow_grps[1:] in _CONSONANT_GROUPS:
-            syl_bound = num_ltrs_btw_vow_grps - 2
-        elif ltrs_btw_vow_grps[:2] in _CONSONANT_GROUPS:
-            syl_bound = 2
+        num_consonants = num_ltrs_btw_vow_grps
+        syl_bound = 0
+        split_case_nasal_cons_tag = ""
+    if num_ltrs_btw_vow_grps == 2:
+        if ltrs_btw_vow_grps not in _CONSONANT_GROUPS:
+            syl_bound += 1
+            split_case = f"{num_consonants} consonants between vowels{split_case_nasal_cons_tag}"
         else:
-            syl_bound = 1
-        split_case = "3+ consonants between vowels"
+            split_case = f"{num_consonants} consonants (consonant group) between vowels{split_case_nasal_cons_tag}"
+    elif ltrs_btw_vow_grps == "str":
+        split_case = f"{num_consonants} consonants ('str' group) between vowels{split_case_nasal_cons_tag}"
+    elif ltrs_btw_vow_grps[1:] in _CONSONANT_GROUPS:
+        syl_bound += 1
+        split_case = f"{num_consonants} consonants (consonant group) between vowels{split_case_nasal_cons_tag}"
+    elif ltrs_btw_vow_grps[:2] in _CONSONANT_GROUPS:
+        split_case = f"{num_consonants} consonants (consonant group) between vowels{split_case_nasal_cons_tag}"
+    else:
+        syl_bound += 1
+        split_case = f"{num_consonants} consonants between vowels{split_case_nasal_cons_tag}"
     return syl_bound, split_case
 
 
