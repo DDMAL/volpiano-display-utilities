@@ -249,7 +249,7 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
     # If the first letter of the consonant sequence is a nasalized consonant,
     # we add it to the prior syllable and treat the remaining consonants
     # as if they were the only consonants between the vowel groups.
-    num_consonants = num_ltrs_btw_vow_grps
+    num_consonants: int = num_ltrs_btw_vow_grps
     if ltrs_btw_vow_grps[0] in _NASALIZED_CONSONANTS:
         syl_bound = 1
         ltrs_btw_vow_grps = ltrs_btw_vow_grps[1:]
