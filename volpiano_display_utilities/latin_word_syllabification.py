@@ -251,7 +251,7 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
     # as if they were the only consonants between the vowel groups.
     num_consonants: int = num_ltrs_btw_vow_grps
     if ltrs_btw_vow_grps[0] in _NASALIZED_CONSONANTS:
-        syl_bound = 1
+        syl_bound: int = 1
         ltrs_btw_vow_grps = ltrs_btw_vow_grps[1:]
         num_ltrs_btw_vow_grps -= 1
         # If there is only one consonant remaining, we treat it as the only
@@ -263,7 +263,7 @@ def _get_syl_bound_position(ltrs_btw_vow_grps: str) -> Tuple[int, str]:
     if num_ltrs_btw_vow_grps == 2:
         if ltrs_btw_vow_grps not in _CONSONANT_GROUPS:
             syl_bound += 1
-            split_case = f"{num_consonants} consonants between vowels"
+            split_case: str = f"{num_consonants} consonants between vowels"
         else:
             split_case = f"{num_consonants} consonants (consonant group) between vowels"
     elif ltrs_btw_vow_grps == "str":
