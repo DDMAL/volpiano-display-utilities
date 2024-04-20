@@ -157,7 +157,7 @@ flowchart TD
     A --> J
 ```
 
-*Note (1)*: Prefixes considered are "ab", "ob", "ad", "per", "sub", "in", and "con".
+*Note (1)*: Prefixes considered are "ab", "ob", "ad", "per", "sub", "in", "con" and "co". Prefixes are only removed when they are followed by a vowel; if not followed by a vowel, the rules regarding consonant placement are the same for the prefix as the rest of the word. An example will help illustrate. The word "perviam" should be syllabified "per-vi-am": the division of "rv" into two separate syllables follows the general rule of consonant placement (add the first consonant to the preceding syllable and the second consonant to the following syllable). The word "periurem", however, should be syllabified "per-iu-rem." Here, the general rule of consonant placement would call for the "r" to adhere to the following syllable. Because it is a prefix, however, the "r" stays in the first syllable.
 
 *Note (2)*: Written "i"s and "y"s may be semivowels and written "u"s may be semi-vowels or consonants. 
 "I"s are semivowels:
