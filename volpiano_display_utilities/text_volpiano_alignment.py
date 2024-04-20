@@ -6,6 +6,7 @@ at https://cantusdatabase.org/documents). See the README for more information.
 
 Use align_text_and_volpiano to align the text and melody strings of a chant.
 """
+
 import logging
 from itertools import zip_longest
 from typing import List, Tuple, TypeVar
@@ -347,6 +348,11 @@ def align_text_and_volpiano(
     )
     if vol_chars_rmvd_flag:
         review_encoding_flag = True
+    # If the preprocessed volpiano string is empty, we add a space
+    # so that the remaining "alignment" can proceed: in
+    # this case, the text is just aligned with empty space.
+    if preprocessed_volpiano == "":
+        preprocessed_volpiano += "-"
     # If volpiano ends with a proper barline ("3" or "4"), remove it from the string
     # before syllabification and save it for later. If it does not, syllabify
     # the volpiano string as is, but add a proper barline (default "3") to the
