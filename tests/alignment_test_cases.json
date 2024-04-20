@@ -736,5 +736,29 @@
             ["","g7---"],
             ["","3"]
         ]
+    },
+    {
+        "case_name": "Clef-only melody entered",
+        "text_input": "Maria Magdalene et altera Maria",
+        "vol_input": "1",
+        "review_encoding_flag": true,
+        "expected_result": [
+            ["","1---"],
+            ["Ma-","---"],
+            ["ri-","---"],
+            ["a","---"],
+            ["Mag-","----"],
+            ["da-","---"],
+            ["le-","---"],
+            ["ne","---"],
+            ["et","----"],
+            ["al-","----"],
+            ["te-","---"],
+            ["ra","---"],
+            ["Ma-","----"],
+            ["ri-","---"],
+            ["a","---"],
+            ["","3"]
+        ]
     }
 ]
