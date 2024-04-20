@@ -150,7 +150,7 @@ def _align_section(
             text_section.section,
             volpiano_section.section,
             pad_text=[""],
-            pad_volpiano=["----"],
+            pad_volpiano=["---"],
         )
         if section_padded_flag:
             section_misaligned_flag = True
