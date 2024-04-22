@@ -71,6 +71,12 @@ _QG = {"q", "g"}
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
 
 
+class LatinError(ValueError):
+    """
+    Raised when a non-alphabetic character is found in a Latin word.
+    """
+
+
 def split_word_by_syl_bounds(word: str, syl_bounds: List[int]) -> List[str]:
     """
     Splits a word into syllables based on syllable boundaries.
@@ -382,7 +388,7 @@ def syllabify_word(word: str, return_string: bool = False) -> Union[List[int], s
     if not isinstance(word, str):
         raise TypeError(f"Word must be a string. Got {type(word)}.")
     if LATIN_ALPH_REGEX.search(word):
-        raise ValueError(f"Word {word} contains non-alphabetic characters.")
+        raise LatinError(f"Word {word} contains non-alphabetic characters.")
     lowercase_word = word.lower()
     syllable_boundaries = _syllabify(lowercase_word)
     if return_string:

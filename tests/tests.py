@@ -1,6 +1,7 @@
 """
 Tests functioanlity of this package.
 """
+
 import unittest
 import json
 import csv
@@ -8,6 +9,7 @@ import csv
 from volpiano_display_utilities.latin_word_syllabification import (
     syllabify_word,
     split_word_by_syl_bounds,
+    LatinError,
 )
 from volpiano_display_utilities.cantus_text_syllabification import (
     _clean_text,
@@ -64,6 +66,18 @@ class TestWordSyllabification(unittest.TestCase):
                 self.assertEqual(
                     "".join(split_word_by_syl_bounds(word, word_syl_bounds[word])),
                     expected,
+                )
+
+    def test_character_check(self):
+        """
+        Tests that an error is raised with invalid characters.
+        """
+        invalid_characters = "1%[}|~`"
+        some_valid_characters = "allelu"
+        for char in invalid_characters:
+            with self.subTest(char=char):
+                self.assertRaises(
+                    LatinError, syllabify_word, f"{some_valid_characters}{char}"
                 )
 
 
@@ -270,6 +284,17 @@ class TestCantusTextSyllabification(unittest.TestCase):
                 syllabified_text_list,
                 expected_result,
             )
+        with self.subTest("Improperly encoded #"):
+            preceding_hash_text = "rorate #-li de super"
+            following_hash_text = "rorate cae-# de super"
+            with self.assertRaises(LatinError):
+                syllabify_text(preceding_hash_text)
+            with self.assertRaises(LatinError):
+                syllabify_text(following_hash_text)
+        with self.subTest("Improperly encoded [ & ]"):
+            test_with_bad_bracket = "rorate | caeli [de super]"
+            with self.assertRaises(LatinError):
+                syllabify_text(test_with_bad_bracket)
 
 
 class TestVolpianoSyllabification(unittest.TestCase):
