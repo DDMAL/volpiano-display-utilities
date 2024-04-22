@@ -335,11 +335,13 @@ def align_text_and_volpiano(
     review_encoding_flag: bool = False
     # If cleaning of text is required, we set the review_encoding_flag to True
     try:
-        syllabified_text = syllabify_text(
+        syllabified_text, spacing_adjusted = syllabify_text(
             chant_text, clean_text=False, text_presyllabified=text_presyllabified
         )
+        if spacing_adjusted:
+            review_encoding_flag = True
     except ValueError:
-        syllabified_text = syllabify_text(
+        syllabified_text, spacing_adjusted = syllabify_text(
             chant_text, clean_text=True, text_presyllabified=text_presyllabified
         )
         review_encoding_flag = True

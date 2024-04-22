@@ -6,6 +6,9 @@ import unittest
 import json
 import csv
 
+from typing import List, Dict
+from typing_extensions import TypedDict
+
 from volpiano_display_utilities.latin_word_syllabification import (
     syllabify_word,
     split_word_by_syl_bounds,
@@ -31,7 +34,7 @@ class TestWordSyllabification(unittest.TestCase):
     Tests functions in latin_text_syllabification.
     """
 
-    def test_syllabify_word(self):
+    def test_syllabify_word(self) -> None:
         """Tests syllabify_word."""
         # Read test words from csv file and get syllable boundaries.
         # ie. "Be-ne-dic-tus" -> [2, 4, 7]
@@ -53,14 +56,18 @@ class TestWordSyllabification(unittest.TestCase):
             with self.subTest(word=word):
                 self.assertEqual(syllabify_word(word, return_string=False), expected)
 
-    def test_split_word_by_syl_bounds(self):
+    def test_split_word_by_syl_bounds(self) -> None:
         """
         Tests split_word_by_syl_bounds.
 
         Test 1, 2, and 2+ syllable words.
         """
         test_words = {"Benedictus": "Be-ne-dic-tus", "qui": "qui", "venit": "ve-nit"}
-        word_syl_bounds = {"Benedictus": [2, 4, 7], "qui": [], "venit": [2]}
+        word_syl_bounds: Dict[str, List[int]] = {
+            "Benedictus": [2, 4, 7],
+            "qui": [],
+            "venit": [2],
+        }
         for word, expected in test_words.items():
             with self.subTest(word=word):
                 self.assertEqual(
@@ -68,7 +75,7 @@ class TestWordSyllabification(unittest.TestCase):
                     expected,
                 )
 
-    def test_character_check(self):
+    def test_character_check(self) -> None:
         """
         Tests that an error is raised with invalid characters.
         """
@@ -86,25 +93,25 @@ class TestCantusTextSyllabification(unittest.TestCase):
     Tests functions in cantus_text_syllabification.
     """
 
-    def test_cantus_exceptions(self):
+    def test_cantus_exceptions(self) -> None:
         """Tests syllabification of a few words that are exceptions
         in the Cantus Database."""
         exception_word = "euouae"
-        syllabified_word = flatten_syllabified_text(syllabify_text(exception_word))
+        syllabified_word = flatten_syllabified_text(syllabify_text(exception_word)[0])
         self.assertEqual(syllabified_word, "e-u-o-u-a-e")
         exception_word_capitalized = "Euouae"
         syllabified_word_capitalized = flatten_syllabified_text(
-            syllabify_text(exception_word_capitalized)
+            syllabify_text(exception_word_capitalized)[0]
         )
         self.assertEqual(syllabified_word_capitalized, "E-u-o-u-a-e")
 
-    def test_clean_text(self):
+    def test_clean_text(self) -> None:
         """Tests _clean_text."""
         initial_text = "abcdefg @#$&*[^@]#${}|~[]/|\\"
         expected_text = "abcdefg #[]#{}|~[]|"
         self.assertEqual(_clean_text(initial_text), expected_text)
 
-    def test_prepare_string_for_syllabification(self):
+    def test_prepare_string_for_syllabification(self) -> None:
         """Tests _prepare_string_for_syllabification."""
         str_hyphen_start = "-ABCDEFG"
         str_hyphen_end = "ABCDEFG-"
@@ -117,7 +124,7 @@ class TestCantusTextSyllabification(unittest.TestCase):
             ("ABCDEFG", False, True),
         )
 
-    def test_split_text_sections(self):
+    def test_split_text_sections(self) -> None:
         """
         Tests _split_text_sections.
 
@@ -134,7 +141,7 @@ class TestCantusTextSyllabification(unittest.TestCase):
         ]
         self.assertEqual(_split_text_sections(start_str), sectioned)
 
-    def test_syllabify_text(self):
+    def test_syllabify_text(self) -> None:
         """Tests syllabify_text. Constructs a test string with all possible cases."""
 
         # Full text of test:
@@ -142,7 +149,12 @@ class TestCantusTextSyllabification(unittest.TestCase):
         # Bene- {dictus} qui venit {#} no- {#} -ne {#} -omini
         # {cantic- #} {#} {# -ovum} quia mirabilia fecit | salvavit sibi dextera
         # eius et brachium sanctum eius | ~Gloria | ~Ipsum [Canticum]"
-        test_cases = [
+        class TestCaseType(TypedDict):
+            case_name: str
+            test_string: str
+            expected_result: List[List[List[str]]]
+
+        test_cases: List[TestCaseType] = [
             {
                 "case_name": "Normal Text",
                 "test_string": "Sanctus sanctus sanctus",
@@ -230,7 +242,9 @@ class TestCantusTextSyllabification(unittest.TestCase):
         ]
         for test_case in test_cases:
             with self.subTest(test_case["case_name"]):
-                syllabified_text = syllabify_text(test_case["test_string"])
+                syllabified_text, adjusted_spacing = syllabify_text(
+                    test_case["test_string"]
+                )
                 syllabified_text_list = [
                     section.section for section in syllabified_text
                 ]
@@ -238,6 +252,7 @@ class TestCantusTextSyllabification(unittest.TestCase):
                     syllabified_text_list,
                     test_case["expected_result"],
                 )
+                self.assertFalse(adjusted_spacing)
         # Test presyllabified text
         presyllabified_text = (
             # Test case where a syllable break has been added
@@ -276,7 +291,7 @@ class TestCantusTextSyllabification(unittest.TestCase):
             [["ecce"], ["enim"], ["ex"], ["hoc"], ["be-", "a-", "tam"]],
         ]
         with self.subTest("Presyllabified Text"):
-            syllabified_text = syllabify_text(
+            syllabified_text, adjusted_spacing = syllabify_text(
                 presyllabified_text, text_presyllabified=True
             )
             syllabified_text_list = [section.section for section in syllabified_text]
@@ -284,13 +299,34 @@ class TestCantusTextSyllabification(unittest.TestCase):
                 syllabified_text_list,
                 expected_result,
             )
+            self.assertFalse(adjusted_spacing)
         with self.subTest("Improperly encoded #"):
-            preceding_hash_text = "rorate #-li de super"
-            following_hash_text = "rorate cae-# de super"
-            with self.assertRaises(LatinError):
-                syllabify_text(preceding_hash_text)
-            with self.assertRaises(LatinError):
-                syllabify_text(following_hash_text)
+            test_no_space_before_hash = "rorate #-li de super"
+            test_no_space_after_hash = "rorate cae-# de super"
+            expected_no_space_before_hash = [
+                [["ro-", "ra-", "te"],
+                ["#"], ["-li"],
+                ["de"], ["su-", "per"]],
+            ]
+            expected_no_space_after_hash = [
+                [["ro-", "ra-", "te"],
+                ["cae-"], ["#"],
+                ["de"], ["su-", "per"]],
+            ]
+            syllabified_text_no_space_before_hash, _ = syllabify_text(
+                test_no_space_before_hash
+            )
+            syllabified_text_no_space_after_hash, _ = syllabify_text(
+                test_no_space_after_hash
+            )
+            self.assertEqual(
+                [section.section for section in syllabified_text_no_space_before_hash],
+                expected_no_space_before_hash,
+            )
+            self.assertEqual(
+                [section.section for section in syllabified_text_no_space_after_hash],
+                expected_no_space_after_hash,
+            )
         with self.subTest("Improperly encoded [ & ]"):
             test_with_bad_bracket = "rorate | caeli [de super]"
             with self.assertRaises(LatinError):
@@ -302,7 +338,7 @@ class TestVolpianoSyllabification(unittest.TestCase):
     Tests functions for syllabifying volpiano in volpiano_syllabification.py.
     """
 
-    def test_prepare_volpiano_for_alignment(self):
+    def test_prepare_volpiano_for_alignment(self) -> None:
         standard_volpiano = "1---g---h---3"
         volpiano_with_extra_starting_matter = "tf-g-1---g-1--h---3"
         expected = "g---h---3"
@@ -326,8 +362,14 @@ class TestVolpianoSyllabification(unittest.TestCase):
             )
             self.assertTrue(vol_chars_rmvd_flag)
 
-    def test_syllabify_volpiano(self):
-        volpiano_syllabification_test_cases = [
+    def test_syllabify_volpiano(self) -> None:
+        class TestCaseType(TypedDict):
+            case_name: str
+            volpiano: str
+            vol_improperly_encoded: bool
+            expected_result: List[List[List[str]]]
+
+        volpiano_syllabification_test_cases: List[TestCaseType] = [
             {
                 "case_name": "Section divided by barline '3' + standard spacing",
                 "volpiano": "a-b--c---d---e---3---",
@@ -390,7 +432,7 @@ class TestVolpianoSyllabification(unittest.TestCase):
                     vol_improperly_encoded, test_case["vol_improperly_encoded"]
                 )
 
-    def test_adjust_missing_music_spacing_for_rendering(self):
+    def test_adjust_missing_music_spacing_for_rendering(self) -> None:
         with self.subTest("Not a missing music section"):
             volpiano = "a-b--c---"
             text_length = 3
@@ -432,7 +474,7 @@ class TestTextVolpianoAlignment(unittest.TestCase):
     text_volpiano_alignment.py.
     """
 
-    def test_align_text_volpiano(self):
+    def test_align_text_volpiano(self) -> None:
         """
         Tests align_text_volpiano.
         """
