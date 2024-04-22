@@ -101,7 +101,7 @@ The `align_text_and_volpiano` function also takes the following optional argumen
 
 ### Word Syllabification
 
-`syllabify_word` syllabifies individual latin words according to linguistic rules. `syllabify_word` can either return a list of syllable boundaries or a string hyphenated at syllable boundaries. Strings passed to `syllabify_word` must contain only ASCII alphabetic characters; strings with other characters will raise a `ValueError`. 
+`syllabify_word` syllabifies individual latin words according to linguistic rules. `syllabify_word` can either return a list of syllable boundaries or a string hyphenated at syllable boundaries. Strings passed to `syllabify_word` must contain only ASCII alphabetic characters; strings with other characters will raise a `LatinError`. 
 
 ```python 
 >>> from latin_word_syllabification import syllabify_word
