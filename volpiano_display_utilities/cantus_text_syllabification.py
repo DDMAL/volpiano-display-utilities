@@ -39,6 +39,14 @@ STR_BEGINS_W_HYPHEN_REGEX = re.compile(r"^\-")
 STR_ENDS_W_HYPHEN_REGEX = re.compile(r"\-$")
 # Matches pipes and missing music sectioners ("{" and "}")
 TEXT_SECTIONER_REGEX = re.compile(r"(\||\{.*?\}|~.*?(?=\||$))")
+# Matches all hashes and preceding spaces, if any, except
+# hashes that are immediately preceded by an open curly brace or
+# the start of the string
+SPACE_PRECEDING_HASH_REGEX = re.compile(r"(?<=[^\{]) ?#")
+# Matches all hashes and following spaces, if any, except
+# hashes that are immediately followed by a close curly brace or
+# the end of the string
+SPACE_FOLLOWING_HASH_REGEX = re.compile(r"# ?(?=[^\}])")
 
 
 def _clean_text(text: str) -> str:
@@ -63,13 +71,31 @@ def _detect_invalid_characters(text: str) -> bool:
     return bool(INVALID_CHAR_REGEX.search(text))
 
 
+def _space_hash_signs(text: str) -> Tuple[str, bool]:
+    """
+    Spaces out hash signs ("#") in a text string to
+    ensure that they are syllabified as individual
+    words.
+
+    text [str]: text string to space out
+
+    returns [str, bool]: text string with hash signs spaced out
+        and boolean indicating whether spacing adjustments
+        were made
+    """
+    spaced_text = SPACE_PRECEDING_HASH_REGEX.sub(" #", text)
+    spaced_text = SPACE_FOLLOWING_HASH_REGEX.sub("# ", spaced_text)
+    adjusted = spaced_text != text
+    return spaced_text, adjusted
+
+
 def _prepare_string_for_syllabification(word_str: str) -> Tuple[str, bool, bool]:
     """
-    Complete preparation of a string before syllabification.
+    Complete preparation of a word string before syllabification.
     Hyphens are removed from the beginning and end of the string,
     and the presence of these hyphens is recorded.
 
-    word_str [str]: string to prepare
+    word_str [str]: string containing a word (or partial word) to prepare
 
     returns [tuple[str,bool,bool]]: prepared string, whether a hyphen
         was removed from the beginning of the string, whether a hyphen
@@ -102,7 +128,7 @@ def syllabify_text(
     text: str,
     clean_text: bool = False,
     text_presyllabified: bool = False,
-) -> List[SyllabifiedTextSection]:
+) -> Tuple[List[SyllabifiedTextSection], bool]:
     """
     Syllabifies a text string that has been encoded in the style
     of the Cantus Database. Texts are syllabified word by word,
@@ -120,9 +146,9 @@ def syllabify_text(
         This function finds a syllable split if and only if a hyphen is
         present (ie. no additional syllabification is performed).
 
-    returns [SyllabifiedTextSection]: an object of class SyllabifiedTextSection
-        that contains the syllabified text string. See class docstring for more
-        information.
+    returns [SyllabifiedTextSection, bool]: an object of class SyllabifiedTextSection
+        that contains the syllabified text string and a boolean indicating whether
+        spacing adjustments. See class docstring for more information.
     """
 
     logging.debug("Syllabifying text: %s", text)
@@ -135,6 +161,8 @@ def syllabify_text(
             raise ValueError(
                 "Invalid characters detected in text string. To clean, use clean_text=True."
             )
+    # Space out hash signs if necessary
+    text, spacing_adjusted = _space_hash_signs(text)
     # Split text into sections. Sections are divided by pipes ("|") or enclosed
     # in curly braces ("{}") or square brackets ("[]").
     text_sections = _split_text_sections(text)
@@ -195,10 +223,10 @@ def syllabify_text(
                 syllabified_section.append(syllabified_word)
         syllabified_text.append(SyllabifiedTextSection(syllabified_section))
     logging.debug("Syllabified text: %s", ", ".join(str(s) for s in syllabified_text))
-    return syllabified_text
+    return syllabified_text, spacing_adjusted
 
 
-def flatten_syllabified_text(syllabified_text=List[SyllabifiedTextSection]) -> str:
+def flatten_syllabified_text(syllabified_text: List[SyllabifiedTextSection]) -> str:
     """
     Flattens a list of syllabified text sections to a string.
 
