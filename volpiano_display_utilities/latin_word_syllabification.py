@@ -97,7 +97,7 @@ def split_word_by_syl_bounds(word: str, syl_bounds: List[int]) -> List[str]:
 def _get_prefixes(word: str) -> str:
     """
     Returns the prefix of a word, if it has one that is followed by a vowel.
-    FOr details on prefixes, see README.
+    For details on prefixes, see README.
 
     word [str]: word to check for prefix
 
@@ -106,7 +106,7 @@ def _get_prefixes(word: str) -> str:
     """
     for prefix in _PREFIX_GROUPS:
         # If the word is itself one of the prefixes (eg. "in" can
-        # be a word or a prefix), doen't return a prefix
+        # be a word or a prefix), don't return a prefix
         if word.startswith(prefix) and (word != prefix):
             prefix_length = len(prefix)
             if word[prefix_length] in _VOWELS:
