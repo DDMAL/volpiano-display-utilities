@@ -141,12 +141,12 @@ flowchart TD
             direction LR
             H1[Consonant added before second vowel] ~~~ H2["'X' added after first vowel"]
         end
-        subgraph c2 [Two consonants between vowels (5)]
+        subgraph c2 ["Two consonants between vowels (5)"]
             direction LR
             H3["Consonants are consonant cluster (4)"] -->|Yes| H4[Cluster added before second vowel]
             H3 -->|No| H5[First consonant added after first vowel, \n second consonant added before second vowel]
         end
-        subgraph c3 [Three-plus consonants between vowels (5)]
+        subgraph c3 ["Three-plus consonants between vowels (5)"]
             direction LR
            H6["First two consonants are consonant cluster"] -->|Yes| H7[Cluster added after first vowel, \n remaining consosnants added before second vowel]
             H6 -->|No| H8[First consonant added after first vowel, \n remaining consonants added before second vowel]
