@@ -24,11 +24,11 @@ Logs at level = DEBUG.
 
 import logging
 import re
-from typing import Union, Tuple, List
+from typing import Union, Tuple, List, Set
 
 # Consonant groups are groups of consonants that are treated as a single
 # consonant for the purposes of syllabification. For details, see README.
-_CONSONANT_GROUPS: set = {
+_CONSONANT_GROUPS: Set[str] = {
     "ch",
     "ph",
     "th",
@@ -53,20 +53,20 @@ _CONSONANT_GROUPS: set = {
 }
 
 
-_NASALIZED_CONSONANTS: set = {"m", "n"}
+_NASALIZED_CONSONANTS: Set[str] = {"m", "n"}
 
 # Prefix groups are groups of characters that serve as common prefixes. For details,
 # see README.
-_PREFIX_GROUPS: set = {"ab", "ob", "ad", "per", "sub", "in", "con", "co"}
+_PREFIX_GROUPS: Set[str] = {"ab", "ob", "ad", "per", "sub", "in", "con", "co"}
 
-_VOWELS: set = {"a", "e", "i", "o", "u", "y"}
-_VOWELS_AEOU: set = {"a", "e", "o", "u"}
-_VOWELS_AEIOU: set = {"a", "e", "i", "o", "u"}
-_VOWELS_AEO: set = {"a", "e", "o"}
-_VOWELS_EOU: set = {"e", "o", "u"}
-_VOWELS_IY: set = {"i", "y"}
-_VOWELS_IUY: set = {"i", "u", "y"}
-_QG = {"q", "g"}
+_VOWELS: Set[str] = {"a", "e", "i", "o", "u", "y"}
+_VOWELS_AEOU: Set[str] = {"a", "e", "o", "u"}
+_VOWELS_AEIOU: Set[str] = {"a", "e", "i", "o", "u"}
+_VOWELS_AEO: Set[str] = {"a", "e", "o"}
+_VOWELS_EOU: Set[str] = {"e", "o", "u"}
+_VOWELS_IY: Set[str] = {"i", "y"}
+_VOWELS_IUY: Set[str] = {"i", "u", "y"}
+_QG: Set[str] = {"q", "g"}
 
 LATIN_ALPH_REGEX = re.compile(r"[^a-zA-Z]")
 
