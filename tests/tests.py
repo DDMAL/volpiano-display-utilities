@@ -239,6 +239,25 @@ class TestCantusTextSyllabification(unittest.TestCase):
                     [["~canticum novum"]],
                 ],
             },
+            {
+                "case_name": "Text with missing words enclosed in square brackets",
+                "test_string": "Benedictus sis [tanta multitudine]",
+                "expected_result": [
+                    [["Be-", "ne-", "dic-", "tus"], ["sis"]],
+                    [["[tanta multitudine]"]],
+                ],
+            },
+            {
+                "case_name": "Text with missing words spanning multiple sections",
+                "test_string": "Benedictus sis [tanta | multitudine] militum | sanctorum",
+                "expected_result": [
+                    [["Be-", "ne-", "dic-", "tus"], ["sis"]],
+                    [["[tanta | multitudine]"]],
+                    [["mi-", "li-", "tum"]],
+                    [["|"]],
+                    [["sanc-", "to-", "rum"]],
+                ],
+            },
         ]
         for test_case in test_cases:
             with self.subTest(test_case["case_name"]):
@@ -304,14 +323,10 @@ class TestCantusTextSyllabification(unittest.TestCase):
             test_no_space_before_hash = "rorate #-li de super"
             test_no_space_after_hash = "rorate cae-# de super"
             expected_no_space_before_hash = [
-                [["ro-", "ra-", "te"],
-                ["#"], ["-li"],
-                ["de"], ["su-", "per"]],
+                [["ro-", "ra-", "te"], ["#"], ["-li"], ["de"], ["su-", "per"]],
             ]
             expected_no_space_after_hash = [
-                [["ro-", "ra-", "te"],
-                ["cae-"], ["#"],
-                ["de"], ["su-", "per"]],
+                [["ro-", "ra-", "te"], ["cae-"], ["#"], ["de"], ["su-", "per"]],
             ]
             syllabified_text_no_space_before_hash, _ = syllabify_text(
                 test_no_space_before_hash
@@ -327,10 +342,6 @@ class TestCantusTextSyllabification(unittest.TestCase):
                 [section.section for section in syllabified_text_no_space_after_hash],
                 expected_no_space_after_hash,
             )
-        with self.subTest("Improperly encoded [ & ]"):
-            test_with_bad_bracket = "rorate | caeli [de super]"
-            with self.assertRaises(LatinError):
-                syllabify_text(test_with_bad_bracket)
 
 
 class TestVolpianoSyllabification(unittest.TestCase):
