@@ -38,8 +38,9 @@ INVALID_CHAR_REGEX = re.compile(r"[^a-zA-Z#~\{\}\[\]\|\- ]")
 STR_BEGINS_W_HYPHEN_REGEX = re.compile(r"^\-")
 # Matches a string that ends with a hyphen
 STR_ENDS_W_HYPHEN_REGEX = re.compile(r"\-$")
-# Matches pipes and missing music sectioners ("{" and "}")
-TEXT_SECTIONER_REGEX = re.compile(r"(\||\{.*?\}|~.*?(?=\||$))")
+# Matches pipes and missing music sectioners ("{" and "}" or "[" and "]", except
+# when the latter is an incipit, denoted by a section beginning with a tilde "~")
+TEXT_SECTIONER_REGEX = re.compile(r"(\||\{.*?\}|~.*?(?=\||$)|\[.*\])")
 # Matches all hashes and preceding spaces, if any, except
 # hashes that are immediately preceded by an open curly brace or
 # the start of the string
