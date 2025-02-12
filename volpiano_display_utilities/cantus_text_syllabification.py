@@ -29,6 +29,7 @@ EXCEPTIONS_DICT = {
     "israelitis": [2, 4, 5, 7],
     "israel": [2, 4],
     "michael": [2, 5],
+    "noe": [2],
 }
 
 # INVALID_CHAR_REGEX matches any character not valid in Cantus DB entries
