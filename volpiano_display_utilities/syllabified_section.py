@@ -15,7 +15,7 @@ class SyllabifiedSection:
     def __init__(self, section: List[List[str]]):
         self.section = section
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.section)
 
     def __repr__(self) -> str:
