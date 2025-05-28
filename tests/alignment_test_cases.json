@@ -150,17 +150,16 @@
             ["", "4"]
         ]
     },
-    {
-        "case_name": "Test alignment: Missing music encoded with too few internal hyphens",
-        "text_input": "in {diebus} e- {ius} obsessa est",
-        "vol_input": "1---f---6--6---f---6----6---g--hg-hgf--ef-gef---ed---3",
-        "review_encoding_flag": true,
+        {
+        "case_name": "Test alignment: Half-bar encoded",
+        "text_input": "in eius obsessa est",
+        "vol_input": "1---f---6---f--ga---6---g--hg-hgf--ef-gef---ed---3",
+        "review_encoding_flag": false,
         "expected_result": [
             ["", "1---"],
-            ["in", "f---"],
-            ["{diebus}", "6------6---"],
-            ["e-", "f---"],
-            ["{ius}", "6------6---"],
+            ["in", "f---6---"],
+            ["e-", "f--"],
+            ["ius", "ga---6---"],
             ["ob-", "g--"],
             ["ses-", "hg-hgf--"],
             ["sa", "ef-gef---"],
@@ -169,19 +168,18 @@
         ]
     },
     {
-        "case_name": "Test alignment: Missing music encoded with too many internal hyphens",
-        "text_input": "in {diebus} e- {ius} obsessa est",
-        "vol_input": "1---f---6-------6---f---6-----------6---g--hg-hgf--ef-gef---ed---3",
-        "review_encoding_flag": true,
+        "case_name": "Test alignment: Half-bar encoded with breaks",
+        "text_input": "in eius obsessa est",
+        "vol_input": "1---f---67---f--ga---677---g--hg-hgf--ef-gef---6777---ed---3",
+        "review_encoding_flag": false,
         "expected_result": [
             ["", "1---"],
-            ["in", "f---"],
-            ["{diebus}", "6------6---"],
-            ["e-", "f---"],
-            ["{ius}", "6------6---"],
+            ["in", "f---67---"],
+            ["e-", "f--"],
+            ["ius", "ga---677---"],
             ["ob-", "g--"],
             ["ses-", "hg-hgf--"],
-            ["sa", "ef-gef---"],
+            ["sa", "ef-gef---6777---"],
             ["est", "ed---"],
             ["", "3"]
         ]
