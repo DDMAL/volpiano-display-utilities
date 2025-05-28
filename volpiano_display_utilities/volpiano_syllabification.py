@@ -24,13 +24,17 @@ STARTING_MATERIAL_REGEX = re.compile(r"^.*?1-*")
 # Split sections of volpiano on clefs, barline markers, and missing
 # music indicators. Includes spacing (hyphens) and section markers (7's)
 # in the split, if present.
-VOLPIANO_SECTIONING_REGEX = re.compile(r"([34][\-7]*|6[\-7]*6[\-7]*)")
+VOLPIANO_SECTIONING_REGEX = re.compile(r"([34][\-7]*|6-{6}6[\-7]*)")
 
 # Split words on sequences of three hyphens or at the end of the string.
-VOLPIANO_WORD_REGEX = re.compile(r".*?-{3,}|.+$")
+# Exception: For a 6 that is not encoding a missing music section (ie. for
+# one that just encodes a half-bar), include it at the end of the previous word.
+VOLPIANO_WORD_REGEX = re.compile(r".*?-{3,}(?:67{0,3}---)?|.+$")
 
 # Split syllables on sequences of two hyphens or at the end of the string.
-VOLPIANO_SYLLABLE_REGEX = re.compile(r".*?-{2,}|.+$")
+# Exception: If a half-bar construct follows a syllable (e.g. "f---6---g")
+# don't split the syllable from the following half-bar
+VOLPIANO_SYLLABLE_REGEX = re.compile(r".*?-{2,}(?:67{0,3}---)?|.+$")
 
 
 def prepare_volpiano_for_syllabification(raw_volpiano_str: str) -> Tuple[str, bool]:
