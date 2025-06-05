@@ -345,9 +345,13 @@ def align_text_and_volpiano(
             chant_text, clean_text=True, text_presyllabified=text_presyllabified
         )
         review_encoding_flag = True
-    preprocessed_volpiano, vol_chars_rmvd_flag = prepare_volpiano_for_syllabification(
-        volpiano
-    )
+    (
+        preprocessed_volpiano,
+        opening_str,
+        vol_chars_rmvd_flag,
+    ) = prepare_volpiano_for_syllabification(volpiano)
+    if opening_str == "":
+        opening_str = "1---"
     if vol_chars_rmvd_flag:
         review_encoding_flag = True
     # If the preprocessed volpiano string is empty, we add a space
@@ -371,7 +375,7 @@ def align_text_and_volpiano(
     if improper_vol_when_syllabified:
         review_encoding_flag = True
     # Add the opening clef with no text
-    aligned_text_and_vol_syls: List[Tuple[str, str]] = [("", "1---")]
+    aligned_text_and_vol_syls: List[Tuple[str, str]] = [("", opening_str)]
     # If the number of sections in the text and volpiano do not match,
     # we need to infer section breaks in the shorter of the strings
     # in order to align them. If barline inference is necessary,

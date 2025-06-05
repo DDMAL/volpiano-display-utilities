@@ -356,6 +356,7 @@ class TestVolpianoSyllabification(unittest.TestCase):
         with self.subTest("Standard starting material"):
             (
                 prepared_volpiano,
+                starting_material,
                 vol_chars_rmvd_flag,
             ) = prepare_volpiano_for_syllabification(standard_volpiano)
             self.assertEqual(prepared_volpiano, expected)
@@ -363,6 +364,7 @@ class TestVolpianoSyllabification(unittest.TestCase):
         with self.subTest("Extra starting material"):
             (
                 prepared_volpiano,
+                starting_material,
                 vol_chars_rmvd_flag,
             ) = prepare_volpiano_for_syllabification(
                 volpiano_with_extra_starting_matter
@@ -371,6 +373,7 @@ class TestVolpianoSyllabification(unittest.TestCase):
                 prepared_volpiano,
                 expected,
             )
+            self.assertEqual(starting_material, "")
             self.assertTrue(vol_chars_rmvd_flag)
 
     def test_syllabify_volpiano(self) -> None:

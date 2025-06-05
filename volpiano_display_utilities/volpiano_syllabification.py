@@ -18,8 +18,12 @@ INVALID_VOLPIANO_CHARS_REGEX = re.compile(
 )
 
 # Matches any material before the first clef, the clef itself, and
-# any following spacing in a volpiano string.
-STARTING_MATERIAL_REGEX = re.compile(r"^.*?1-*")
+# any following accidentals or spacing in a volpiano string.
+STARTING_MATERIAL_REGEX = re.compile(r"^.*?1[iIt-zT-Z<>]*-*")
+
+# Matches correctly-encoded starting material: a clef, any accidentals,
+# followed by 3 hyphens
+CORRECT_STARTING_MATERIAL_REGEX = re.compile(r"^1[iIt-zT-Z<>]*---(?!-)")
 
 # Split sections of volpiano on clefs, barline markers, and missing
 # music indicators. Includes spacing (hyphens) and section markers (7's)
@@ -37,27 +41,36 @@ VOLPIANO_WORD_REGEX = re.compile(r".*?-{3,}(?:67{0,3}---)?|.+$")
 VOLPIANO_SYLLABLE_REGEX = re.compile(r".*?-{2,}(?:67{0,3}---)?|.+$")
 
 
-def prepare_volpiano_for_syllabification(raw_volpiano_str: str) -> Tuple[str, bool]:
+def prepare_volpiano_for_syllabification(
+    raw_volpiano_str: str,
+) -> Tuple[str, str, bool]:
     """
     Prepare volpiano string for syllabification:
     - Remove any invalid characters
-    - Remove the opening clef and anything that appears before the
-        opening clef
+    - Remove the opening clef and key signature and anything that
+        appears before the opening clef, saving it if it was valid
+        as originally entered
 
     raw_volpiano_str [str]: unprocessed volpiano string
 
     returns [str, bool]: preprocessed volpiano string without
-        beginning clef and invalid characters and boolean indicating
+        beginning clef and invalid characters, the valid opening material of
+        the volpiano string, if present, and boolean indicating
         whether invalid volpiano characters or character preceding
         clef were removed
     """
     # Remove existing clef and any material preceding the
     # clef.
     vol_chars_rmvd_flag = False
-    # Check whether the volpiano string clef was correctly encoded before
-    # removing it.
-    if raw_volpiano_str[0:4] != "1---" or raw_volpiano_str[0:5] == "1----":
+    # If the start of the string is correctly encoded (clef, key signature,
+    # and spacing), we save it to prepend after text alignment. If not,
+    # we remove it and prepend a generic "1---" start after alignment.
+    if match_obj := CORRECT_STARTING_MATERIAL_REGEX.match(raw_volpiano_str):
+        saved_vol_start = match_obj[0]
+    else:
         vol_chars_rmvd_flag = True
+        saved_vol_start = ""
+    logging.debug("Saved opening volpiano: %s", saved_vol_start)
     vol_clef_rmvd = STARTING_MATERIAL_REGEX.sub("", raw_volpiano_str)
     processed_vol, num_substitutions = INVALID_VOLPIANO_CHARS_REGEX.subn(
         "", vol_clef_rmvd
@@ -66,7 +79,7 @@ def prepare_volpiano_for_syllabification(raw_volpiano_str: str) -> Tuple[str, bo
     if num_substitutions > 0:
         vol_chars_rmvd_flag = True
     logging.debug("Preprocessed volpiano string: %s", processed_vol)
-    return processed_vol, vol_chars_rmvd_flag
+    return processed_vol, saved_vol_start, vol_chars_rmvd_flag
 
 
 def syllabify_volpiano(volpiano: str) -> Tuple[List[SyllabifiedVolpianoSection], bool]:
