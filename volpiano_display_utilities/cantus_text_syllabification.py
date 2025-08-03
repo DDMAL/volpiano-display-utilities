@@ -12,9 +12,10 @@ or README for more details.
 
 import re
 import logging
-from typing import Tuple, List, cast
+from typing import Tuple, List, cast, Optional
 
 from .latin_word_syllabification import syllabify_word, split_word_by_syl_bounds
+from .kanienkeha_word_syllabification import kanienkeha_syllabify_word
 from .syllabified_section import SyllabifiedTextSection
 
 EXCEPTIONS_DICT = {
@@ -130,6 +131,7 @@ def syllabify_text(
     text: str,
     clean_text: bool = False,
     text_presyllabified: bool = False,
+    language: Optional[str] = None,
 ) -> Tuple[List[SyllabifiedTextSection], bool]:
     """
     Syllabifies a text string that has been encoded in the style
@@ -211,9 +213,18 @@ def syllabify_text(
                     ]
                     logging.debug("Presyllabified word: %s", word)
                 else:
-                    word_syllable_boundaries = cast(
-                        List[int], syllabify_word(prepared_word, return_string=False)
-                    )
+                    if language == "kanienkeha":
+                        word_syllable_boundaries = cast(
+                            List[int],
+                            kanienkeha_syllabify_word(
+                                prepared_word, return_string=False
+                            ),
+                        )
+                    else:
+                        word_syllable_boundaries = cast(
+                            List[int],
+                            syllabify_word(prepared_word, return_string=False),
+                        )
                     syllabified_word = split_word_by_syl_bounds(
                         prepared_word, word_syllable_boundaries
                     )
