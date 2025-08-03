@@ -9,7 +9,7 @@ Use align_text_and_volpiano to align the text and melody strings of a chant.
 
 import logging
 from itertools import zip_longest
-from typing import List, Tuple, TypeVar
+from typing import List, Tuple, TypeVar, Optional
 from .cantus_text_syllabification import syllabify_text
 from .syllabified_section import SyllabifiedTextSection, SyllabifiedVolpianoSection
 from .volpiano_syllabification import (
@@ -314,7 +314,10 @@ def _infer_barlines(
 
 
 def align_text_and_volpiano(
-    chant_text: str, volpiano: str, text_presyllabified: bool = False
+    chant_text: str,
+    volpiano: str,
+    text_presyllabified: bool = False,
+    language: Optional[str] = None,
 ) -> Tuple[List[Tuple[str, str]], bool]:
     """
     Aligns syllabified text with volpiano, performing periodic sanity checks
@@ -336,13 +339,19 @@ def align_text_and_volpiano(
     # If cleaning of text is required, we set the review_encoding_flag to True
     try:
         syllabified_text, spacing_adjusted = syllabify_text(
-            chant_text, clean_text=False, text_presyllabified=text_presyllabified
+            chant_text,
+            clean_text=False,
+            text_presyllabified=text_presyllabified,
+            language=language,
         )
         if spacing_adjusted:
             review_encoding_flag = True
     except ValueError:
         syllabified_text, spacing_adjusted = syllabify_text(
-            chant_text, clean_text=True, text_presyllabified=text_presyllabified
+            chant_text,
+            clean_text=True,
+            text_presyllabified=text_presyllabified,
+            language=language,
         )
         review_encoding_flag = True
     (
