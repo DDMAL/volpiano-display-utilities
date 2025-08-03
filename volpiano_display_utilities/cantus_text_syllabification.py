@@ -33,7 +33,7 @@ EXCEPTIONS_DICT = {
 }
 
 # INVALID_CHAR_REGEX matches any character not valid in Cantus DB entries
-INVALID_CHAR_REGEX = re.compile(r"[^a-zA-Z#~\{\}\[\]\|\- ]")
+INVALID_CHAR_REGEX = re.compile(r"[^\w#~\{\}\[\]\|\- 8]")
 # Matches a string that begins with a hyphen
 STR_BEGINS_W_HYPHEN_REGEX = re.compile(r"^\-")
 # Matches a string that ends with a hyphen

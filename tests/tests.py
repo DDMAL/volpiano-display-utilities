@@ -10,9 +10,12 @@ from typing import List, Dict
 from typing_extensions import TypedDict
 
 from volpiano_display_utilities.latin_word_syllabification import (
-    syllabify_word,
+    syllabify_word as latin_syllabify_word,
     split_word_by_syl_bounds,
     LatinError,
+)
+from volpiano_display_utilities.kanienkeha_word_syllabification import (
+    syllabify_word as kaniekeha_syllabify_word,
 )
 from volpiano_display_utilities.cantus_text_syllabification import (
     _clean_text,
@@ -34,13 +37,13 @@ class TestWordSyllabification(unittest.TestCase):
     Tests functions in latin_text_syllabification.
     """
 
-    def test_syllabify_word(self) -> None:
+    def test_latin_syllabify_word(self) -> None:
         """Tests syllabify_word."""
         # Read test words from csv file and get syllable boundaries.
         # ie. "Be-ne-dic-tus" -> [2, 4, 7]
         test_words = {}
         with open(
-            "tests/word_syllabification_tests.csv", "r", encoding="utf-8-sig"
+            "tests/word_syllabification_tests/latin.csv", "r", encoding="utf-8-sig"
         ) as f:
             reader = csv.reader(f)
             for row in reader:
@@ -54,7 +57,31 @@ class TestWordSyllabification(unittest.TestCase):
                 test_words[word] = syl_bounds
         for word, expected in test_words.items():
             with self.subTest(word=word):
-                self.assertEqual(syllabify_word(word, return_string=False), expected)
+                self.assertEqual(
+                    latin_syllabify_word(word, return_string=False), expected
+                )
+
+    def test_kanienkeha_syllabify_word(self) -> None:
+        test_words = {}
+        with open(
+            "tests/word_syllabification_tests/kanienkeha.csv", "r", encoding="utf-8-sig"
+        ) as f:
+            reader = csv.reader(f)
+            for row in reader:
+                word = row[0]
+                syl_list = row[1].split("-")
+                syl_bound = 0
+                syl_bounds = []
+                for syl in syl_list[:-1]:
+                    syl_bound += len(syl)
+                    syl_bounds.append(syl_bound)
+                test_words[word] = syl_bounds
+        for word, expected in test_words.items():
+            with self.subTest(word=word):
+                self.assertEqual(
+                    kaniekeha_syllabify_word(word, return_string=False),
+                    expected,
+                )
 
     def test_split_word_by_syl_bounds(self) -> None:
         """
@@ -84,7 +111,7 @@ class TestWordSyllabification(unittest.TestCase):
         for char in invalid_characters:
             with self.subTest(char=char):
                 self.assertRaises(
-                    LatinError, syllabify_word, f"{some_valid_characters}{char}"
+                    LatinError, latin_syllabify_word, f"{some_valid_characters}{char}"
                 )
 
 
