@@ -10,12 +10,12 @@ from typing import List, Dict
 from typing_extensions import TypedDict
 
 from volpiano_display_utilities.latin_word_syllabification import (
-    syllabify_word as latin_syllabify_word,
+    syllabify_word,
     split_word_by_syl_bounds,
     LatinError,
 )
 from volpiano_display_utilities.kanienkeha_word_syllabification import (
-    syllabify_word as kaniekeha_syllabify_word,
+    kanienkeha_syllabify_word,
 )
 from volpiano_display_utilities.cantus_text_syllabification import (
     _clean_text,
@@ -57,9 +57,7 @@ class TestWordSyllabification(unittest.TestCase):
                 test_words[word] = syl_bounds
         for word, expected in test_words.items():
             with self.subTest(word=word):
-                self.assertEqual(
-                    latin_syllabify_word(word, return_string=False), expected
-                )
+                self.assertEqual(syllabify_word(word, return_string=False), expected)
 
     def test_kanienkeha_syllabify_word(self) -> None:
         test_words = {}
@@ -79,7 +77,7 @@ class TestWordSyllabification(unittest.TestCase):
         for word, expected in test_words.items():
             with self.subTest(word=word):
                 self.assertEqual(
-                    kaniekeha_syllabify_word(word, return_string=False),
+                    kanienkeha_syllabify_word(word, return_string=False),
                     expected,
                 )
 
@@ -111,7 +109,7 @@ class TestWordSyllabification(unittest.TestCase):
         for char in invalid_characters:
             with self.subTest(char=char):
                 self.assertRaises(
-                    LatinError, latin_syllabify_word, f"{some_valid_characters}{char}"
+                    LatinError, syllabify_word, f"{some_valid_characters}{char}"
                 )
 
 

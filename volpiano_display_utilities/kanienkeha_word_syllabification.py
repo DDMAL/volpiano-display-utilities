@@ -325,7 +325,9 @@ def _syllabify(word: str) -> List[int]:
     return syllable_boundaries
 
 
-def syllabify_word(word: str, return_string: bool = False) -> Union[List[int], str]:
+def kanienkeha_syllabify_word(
+    word: str, return_string: bool = False
+) -> Union[List[int], str]:
     """
     See README for details on syllabification rules.
 
